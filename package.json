@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Camezza/mineflayer-GUI/issues"
   },
-  "homepage": "https://github.com/Camezza/mineflayer-GUI#readme"
+  "homepage": "https://github.com/Camezza/mineflayer-GUI#readme",
+  "dependencies": {
+    "mineflayer": "^3.4.0"
+  }
 }
