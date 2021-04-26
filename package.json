@@ -1,0 +1,20 @@
+{
+  "name": "mineflayer-gui",
+  "version": "1.0.0",
+  "description": "A mineflayer plugin for easy interaction with chest GUIs",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Camezza/mineflayer-GUI.git"
+  },
+  "author": "Firejoust",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Camezza/mineflayer-GUI/issues"
+  },
+  "homepage": "https://github.com/Camezza/mineflayer-GUI#readme"
+}
