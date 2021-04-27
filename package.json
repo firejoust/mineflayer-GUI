@@ -18,6 +18,10 @@
   },
   "homepage": "https://github.com/Camezza/mineflayer-GUI#readme",
   "dependencies": {
+    "assert": "^2.0.0",
     "mineflayer": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/assert": "^1.5.4"
   }
 }
