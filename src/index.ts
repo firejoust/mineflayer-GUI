@@ -45,6 +45,25 @@ export namespace mineflayer_gui {
             }
         }
 
+        private retreiveSlot(window:Window, item:Item): (number | null) {
+            for (let slot of window.items()) {
+                let display_match = item.display && slot.customName.includes(item.display);
+                let type_match = item.type && item.type === slot.displayName;
+                let data_match = item.data && item.data === slot.type;
+                let count_match = item.count && item.count === slot.count;
+
+                // if two or more options specified, match if they are both accurate otherwise ignore.
+                let match = (!item.display || display_match) && (!item.type || type_match) && (!item.data || data_match) && (!item.count && count_match);
+                if (match) return slot.slot;
+            }
+            return null;
+        }
+
+        private async awaitWindow(): Promise<Window|null> {
+            
+            this.bot.once("windowOpen", (window) => {this.return window})
+        }
+
         // retreives a window object by navigating through a specified GUI path
         // If path begins with a string/Item, will begin by searching hotbar.
         // If path contains a window, will begin search from there
@@ -65,7 +84,9 @@ export namespace mineflayer_gui {
                         {
                             assert.ok(typeof iterable === 'string', `'display' type was given when not a string.`);
                             let item:Item = { display: iterable }
+                            let current_window = (i < 1) ? this.bot.inventory : current_window;
                             if (i < 1) {
+                                
                             }
                         }
                     case 'item':
@@ -77,6 +98,7 @@ export namespace mineflayer_gui {
                         }
                 }
             }
+            return null;
         }
 
         async retreiveItem(...path:((string | Item | Window)[])): Promise<PrismarineItem|null> {
