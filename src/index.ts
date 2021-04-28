@@ -9,9 +9,10 @@ export namespace mineflayer_gui {
 
     // options for changing click variations
     export interface ClickOptions {
-        clicktype?:('left' | 'right'),
-        clickamount?:number,
-        shift?:boolean,
+        clicktype?:('left' | 'right'), // which mouse button to click with
+        clickamount?:number, // how many times to click the gui item
+        shift?:boolean, // if holding shift while clicking
+        timeout?:number, // the timeout to wait for a window to open
     }
 
     // parameters to narrow down what to click whilst navigating a GUI
@@ -59,9 +60,15 @@ export namespace mineflayer_gui {
             return null;
         }
 
-        private async awaitWindow(): Promise<Window|null> {
-            
-            this.bot.once("windowOpen", (window) => {this.return window})
+        private async awaitWindow(timeout?:number): Promise<Window|null> {
+            return new Promise<Window|null>((resolve) => {
+                let listener = this.bot.once("windowOpen", resolve);
+                let terminate = () => {
+                    this.bot.removeListener(listener, resolve);
+                    resolve(null);
+                }
+                setTimeout(() => resolve(null), timeout || 5000);
+            });
         }
 
         // retreives a window object by navigating through a specified GUI path
