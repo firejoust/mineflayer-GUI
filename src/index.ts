@@ -77,7 +77,7 @@ export namespace mineflayer_gui {
         // If path begins with a string/Item, will begin by searching hotbar.
         // If path contains a window, will begin search from there
         async retreiveWindow(...path:((string | Item | Window)[])): Promise<Window|null> {
-            let current_window:Window;
+            let current_window:(Window | null) = null
             for (let i = 0, pathlength = path.length; i < pathlength; i++) {
                 let iterable = path[i];
                 let type = this.retreiveIterableType(iterable);
@@ -97,15 +97,16 @@ export namespace mineflayer_gui {
 
                             if (current_window) {
                                 let slot = this.retreiveSlot(current_window, item);
+                                current_window.updateSlot(slot, 0);
                             }
-                            i = pathlength;
+                            i = pathlength; // terminate (window timeout)
                         }
                     case 'item':
                         {
                             assert.ok(!(iterable instanceof Window) && !(typeof iterable === 'string'), `'item' type was given when not an item.`);
                             let item:Item = iterable;
                             let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options?.timeout);
-                            
+
                             if (current_window) {
                                 let slot = this.retreiveSlot(current_window, item);
                             }
@@ -113,7 +114,7 @@ export namespace mineflayer_gui {
                         }
                 }
             }
-            return null;
+            return current_window;
         }
 
         async retreiveItem(...path:((string | Item | Window)[])): Promise<PrismarineItem|null> {
