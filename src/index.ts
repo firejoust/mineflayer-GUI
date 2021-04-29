@@ -1,4 +1,6 @@
 import * as mineflayer from 'mineflayer'; 
+import { BotEvents } from 'mineflayer';
+import TypedEmitter from "typed-emitter";
 import { Item as PrismarineItem } from 'prismarine-item'
 import { Window }  from 'prismarine-windows'
 import assert from 'assert';
@@ -60,14 +62,14 @@ export namespace mineflayer_gui {
             return null;
         }
 
-        private async awaitWindow(timeout?:number): Promise<Window|null> {
+        private async windowEvent(timeout?:number): Promise<Window|null> {
             return new Promise<Window|null>((resolve) => {
                 let listener = this.bot.once("windowOpen", resolve);
                 let terminate = () => {
-                    this.bot.removeListener(listener, resolve);
+                    this.bot.removeListener("windowOpen", resolve);
                     resolve(null);
                 }
-                setTimeout(() => resolve(null), timeout || 5000);
+                setTimeout(terminate, timeout || 5000);
             });
         }
 
@@ -91,17 +93,23 @@ export namespace mineflayer_gui {
                         {
                             assert.ok(typeof iterable === 'string', `'display' type was given when not a string.`);
                             let item:Item = { display: iterable }
-                            let current_window = (i < 1) ? this.bot.inventory : current_window;
-                            if (i < 1) {
-                                
+                            let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options?.timeout);
+
+                            if (current_window) {
+                                let slot = this.retreiveSlot(current_window, item);
                             }
+                            i = pathlength;
                         }
                     case 'item':
                         {
                             assert.ok(!(iterable instanceof Window) && !(typeof iterable === 'string'), `'item' type was given when not an item.`);
                             let item:Item = iterable;
-                            if (i < 1) {
+                            let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options?.timeout);
+                            
+                            if (current_window) {
+                                let slot = this.retreiveSlot(current_window, item);
                             }
+                            i = pathlength;
                         }
                 }
             }
