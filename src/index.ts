@@ -1,8 +1,8 @@
-import * as mineflayer from 'mineflayer'; 
+import * as mineflayer from 'mineflayer';
 import { BotEvents } from 'mineflayer';
 import TypedEmitter from "typed-emitter";
 import { Item as PrismarineItem } from 'prismarine-item'
-import { Window }  from 'prismarine-windows'
+import { Window } from 'prismarine-windows'
 import assert from 'assert';
 
 export namespace mineflayer_gui {
@@ -11,29 +11,29 @@ export namespace mineflayer_gui {
 
     // options for changing click variations
     export interface ClickOptions {
-        clicktype?:('left' | 'right'), // which mouse button to click with
-        clickamount?:number, // how many times to click the gui item
-        shift?:boolean, // if holding shift while clicking
-        timeout?:number, // the timeout to wait for a window to open
+        clicktype?: ('left' | 'right'), // which mouse button to click with
+        clickamount?: number, // how many times to click the gui item
+        shift?: boolean, // if holding shift while clicking
+        timeout?: number, // the timeout to wait for a window to open
     }
 
     // parameters to narrow down what to click whilst navigating a GUI
     export interface Item {
-        display?:string,
-        type?:string,
-        data?:number,
-        count?:number,
-        options?:ClickOptions,
+        display?: string,
+        type?: string,
+        data?: number,
+        count?: number,
+        options?: ClickOptions,
     };
 
     export class plugin {
-        private bot:mineflayer.Bot
+        private bot: mineflayer.Bot
 
-        constructor(bot:mineflayer.Bot) {
+        constructor(bot: mineflayer.Bot) {
             this.bot = bot;
         }
 
-        private retreiveIterableType(iterable:(string | Item | Window)): iterable_type {
+        private retreiveIterableType(iterable: (string | Item | Window)): iterable_type {
             switch (typeof iterable) {
                 case 'object': // may not work.
                     {
@@ -48,7 +48,7 @@ export namespace mineflayer_gui {
             }
         }
 
-        private retreiveSlot(window:Window, item:Item): (number | null) {
+        private retreiveSlot(window: Window, item: Item): (number | null) {
             for (let slot of window.items()) {
                 let display_match = item.display && slot.customName.includes(item.display);
                 let type_match = item.type && item.type === slot.displayName;
@@ -62,8 +62,19 @@ export namespace mineflayer_gui {
             return null;
         }
 
-        private async windowEvent(timeout?:number): Promise<Window|null> {
-            return new Promise<Window|null>((resolve) => {
+        private clickSlot(window:Window, slot:number, button:(0|1), shift:boolean) {
+            this.bot._client.write('window_click', {
+                windowId: window.id,
+                slot: slot,
+                mouseButton: button,
+                //action: actionId,
+                mode: shift,
+                item: slot === -999 ? { blockId: -1 } : Item.toNotch(window.slots[slot])
+              })
+        }
+
+        private async windowEvent(timeout?: number): Promise<Window | null> {
+            return new Promise<Window | null>((resolve) => {
                 let listener = this.bot.once("windowOpen", resolve);
                 let terminate = () => {
                     this.bot.removeListener("windowOpen", resolve);
@@ -76,8 +87,8 @@ export namespace mineflayer_gui {
         // retreives a window object by navigating through a specified GUI path
         // If path begins with a string/Item, will begin by searching hotbar.
         // If path contains a window, will begin search from there
-        async retreiveWindow(...path:((string | Item | Window)[])): Promise<Window|null> {
-            let current_window:(Window | null) = null
+        async retreiveWindow(...path: ((string | Item | Window)[])): Promise<Window | null> {
+            let current_window: (Window | null) = null
             for (let i = 0, pathlength = path.length; i < pathlength; i++) {
                 let iterable = path[i];
                 let type = this.retreiveIterableType(iterable);
@@ -92,19 +103,23 @@ export namespace mineflayer_gui {
                     case 'display':
                         {
                             assert.ok(typeof iterable === 'string', `'display' type was given when not a string.`);
-                            let item:Item = { display: iterable }
+                            let item: Item = { display: iterable }
                             let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options?.timeout);
 
                             if (current_window) {
                                 let slot = this.retreiveSlot(current_window, item);
-                                current_window.updateSlot(slot, 0);
+
+                                if (slot) {
+                                    current_window.updateSlot(slot);
+                                    // use bot.clickWindow modified method
+                                }
                             }
                             i = pathlength; // terminate (window timeout)
                         }
                     case 'item':
                         {
                             assert.ok(!(iterable instanceof Window) && !(typeof iterable === 'string'), `'item' type was given when not an item.`);
-                            let item:Item = iterable;
+                            let item: Item = iterable;
                             let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options?.timeout);
 
                             if (current_window) {
@@ -117,11 +132,11 @@ export namespace mineflayer_gui {
             return current_window;
         }
 
-        async retreiveItem(...path:((string | Item | Window)[])): Promise<PrismarineItem|null> {
+        async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
 
         }
 
-        async clickItem(...path:((string | Item | Window)[])): Promise<boolean|null> {
+        async clickItem(...path: ((string | Item | Window)[])): Promise<boolean | null> {
 
         }
     }
