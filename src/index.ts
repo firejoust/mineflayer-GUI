@@ -11,7 +11,8 @@ export namespace mineflayer_gui {
 
     // options for changing click variations
     export interface ClickOptions {
-        clicktype?: ('left' | 'right'), // which mouse button to click with
+        hotbar?: boolean, // if item should be selected in hotbar rather than inventory
+        rightclick?: boolean, // which mouse button to click with
         clickamount?: number, // how many times to click the gui item
         shift?: boolean, // if holding shift while clicking
         timeout?: number, // the timeout to wait for a window to open
@@ -57,20 +58,33 @@ export namespace mineflayer_gui {
 
                 // if two or more options specified, match if they are both accurate otherwise ignore.
                 let match = (!item.display || display_match) && (!item.type || type_match) && (!item.data || data_match) && (!item.count && count_match);
-                if (match) return slot.slot;
+                let hotbar = item.options?.hotbar && slot.slot <= 45 && slot.slot >= 36 // make sure accessible by hotbar
+                if (match && !item.options?.hotbar || hotbar) return slot.slot;
             }
             return null;
         }
 
-        private clickSlot(window:Window, slot:number, button:(0|1), shift:boolean) {
-            this.bot._client.write('window_click', {
-                windowId: window.id,
-                slot: slot,
-                mouseButton: button,
-                //action: actionId,
-                mode: shift,
-                item: slot === -999 ? { blockId: -1 } : Item.toNotch(window.slots[slot])
-              })
+        private clickSlot(window: Window, slot: number, options?: ClickOptions) {
+            for (let i = 0, clicks = options?.clickamount || 1; i < clicks; i++) {
+                this.bot._client.write('window_click', {
+                    windowId: window.id,
+                    slot: slot,
+                    mouseButton: options?.rightclick ? 1 : 0,
+                    //action: actionId,
+                    mode: options?.shift ? 1 : 0,
+                    item: { blockId: -1 },
+                });
+            }
+        }
+
+        private clickHotbarSlot(slot: number) {
+            if (slot >= 36 && slot <= 45) {
+                this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : slot - 36); // hotbar slot starts at 36, offhand at 45
+                this.bot.activateItem();
+                this.bot.deactivateItem();
+                return;
+            }
+            throw new Error(`Unable to get hotbar slot of item not in hotbar.`);
         }
 
         private async windowEvent(timeout?: number): Promise<Window | null> {
@@ -80,6 +94,7 @@ export namespace mineflayer_gui {
                     this.bot.removeListener("windowOpen", resolve);
                     resolve(null);
                 }
+                // need to remove this timeout
                 setTimeout(terminate, timeout || 5000);
             });
         }
@@ -94,6 +109,7 @@ export namespace mineflayer_gui {
                 let type = this.retreiveIterableType(iterable);
                 assert.ok(type !== 'window' || type === 'window' && i < 1, `Window can only be referenced at beginning of path.`);
 
+                // thinking this isnt required at all
                 switch (type) {
                     case 'window':
                         {
@@ -110,8 +126,8 @@ export namespace mineflayer_gui {
                                 let slot = this.retreiveSlot(current_window, item);
 
                                 if (slot) {
-                                    current_window.updateSlot(slot);
-                                    // use bot.clickWindow modified method
+                                    item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(current_window, slot, item.options);
+                                    break;
                                 }
                             }
                             i = pathlength; // terminate (window timeout)
@@ -124,6 +140,11 @@ export namespace mineflayer_gui {
 
                             if (current_window) {
                                 let slot = this.retreiveSlot(current_window, item);
+
+                                if (slot) {
+                                    item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(current_window, slot, item.options);
+                                    break;
+                                }
                             }
                             i = pathlength;
                         }
