@@ -77,25 +77,37 @@ export namespace mineflayer_gui {
             }
         }
 
-        private clickHotbarSlot(slot: number) {
+        private clickHotbarSlot(slot: number, options?: ClickOptions) {
             if (slot >= 36 && slot <= 45) {
                 this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : slot - 36); // hotbar slot starts at 36, offhand at 45
-                this.bot.activateItem();
-                this.bot.deactivateItem();
+                if (options?.rightclick) {
+                    this.bot.activateItem();
+                    this.bot.deactivateItem();
+                }
+
+                else {
+                    this.bot.swingArm();
+                }
                 return;
             }
-            throw new Error(`Unable to get hotbar slot of item not in hotbar.`);
+            throw new Error(`Unable to get hotbar slot of non-hotbar item.`);
         }
 
-        private async windowEvent(timeout?: number): Promise<Window | null> {
+        private async windowEvent(options?: ClickOptions): Promise<Window | null> {
             return new Promise<Window | null>((resolve) => {
-                let listener = this.bot.once("windowOpen", resolve);
+                let complete = (window:Window, timeout:number) => {
+                    clearTimeout(timeout);
+                    resolve(window);
+                }
+
                 let terminate = () => {
-                    this.bot.removeListener("windowOpen", resolve);
+                    this.bot.removeListener("windowOpen", method);
                     resolve(null);
                 }
-                // need to remove this timeout
-                setTimeout(terminate, timeout || 5000);
+
+                let method = (window:Window) => complete(window, timeout);
+                let timeout = setTimeout(terminate, options?.timeout || 5000);
+                this.bot.once("windowOpen", method);
             });
         }
 
@@ -120,7 +132,7 @@ export namespace mineflayer_gui {
                         {
                             assert.ok(typeof iterable === 'string', `'display' type was given when not a string.`);
                             let item: Item = { display: iterable }
-                            let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options?.timeout);
+                            let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options);
 
                             if (current_window) {
                                 let slot = this.retreiveSlot(current_window, item);
@@ -136,7 +148,7 @@ export namespace mineflayer_gui {
                         {
                             assert.ok(!(iterable instanceof Window) && !(typeof iterable === 'string'), `'item' type was given when not an item.`);
                             let item: Item = iterable;
-                            let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options?.timeout);
+                            let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options);
 
                             if (current_window) {
                                 let slot = this.retreiveSlot(current_window, item);
@@ -154,7 +166,12 @@ export namespace mineflayer_gui {
         }
 
         async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
-
+            let window = await this.retreiveWindow(...path);
+            
+            if (window) {
+                let item = this.retreive
+            }
+            return null;
         }
 
         async clickItem(...path: ((string | Item | Window)[])): Promise<boolean | null> {
