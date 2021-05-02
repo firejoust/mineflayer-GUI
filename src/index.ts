@@ -1,6 +1,4 @@
 import * as mineflayer from 'mineflayer';
-import { BotEvents } from 'mineflayer';
-import TypedEmitter from "typed-emitter";
 import { Item as PrismarineItem } from 'prismarine-item'
 import { Window } from 'prismarine-windows'
 import assert from 'assert';
@@ -95,7 +93,7 @@ export namespace mineflayer_gui {
 
         private async windowEvent(options?: ClickOptions): Promise<Window | null> {
             return new Promise<Window | null>((resolve) => {
-                let complete = (window:Window, timeout:number) => {
+                let complete = (window: Window, timeout: number) => {
                     clearTimeout(timeout);
                     resolve(window);
                 }
@@ -105,7 +103,7 @@ export namespace mineflayer_gui {
                     resolve(null);
                 }
 
-                let method = (window:Window) => complete(window, timeout);
+                let method = (window: Window) => complete(window, timeout);
                 let timeout = setTimeout(terminate, options?.timeout || 5000);
                 this.bot.once("windowOpen", method);
             });
@@ -167,15 +165,11 @@ export namespace mineflayer_gui {
 
         async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
             let window = await this.retreiveWindow(...path);
-            
-            if (window) {
-                let item = this.retreive
-            }
             return null;
         }
 
         async clickItem(...path: ((string | Item | Window)[])): Promise<boolean | null> {
-
+            return null;
         }
     }
 }
