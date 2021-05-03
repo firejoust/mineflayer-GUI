@@ -116,49 +116,30 @@ export namespace mineflayer_gui {
             let current_window: (Window | null) = null
             for (let i = 0, pathlength = path.length; i < pathlength; i++) {
                 let iterable = path[i];
-                let type = this.retreiveIterableType(iterable);
-                assert.ok(type !== 'window' || type === 'window' && i < 1, `Window can only be referenced at beginning of path.`);
+                assert.ok(!(iterable instanceof Window) || iterable instanceof Window && i < 1, `Window can only be referenced at beginning of path.`);
 
-                // thinking this isnt required at all
-                switch (type) {
-                    case 'window':
-                        {
-                            assert.ok(iterable instanceof Window, `'window' type was given when not a window.`);
-                            current_window = iterable;
-                        }
-                    case 'display':
-                        {
-                            assert.ok(typeof iterable === 'string', `'display' type was given when not a string.`);
-                            let item: Item = { display: iterable }
-                            let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options);
-
-                            if (current_window) {
-                                let slot = this.retreiveSlot(current_window, item);
-
-                                if (slot) {
-                                    item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(current_window, slot, item.options);
-                                    break;
-                                }
-                            }
-                            i = pathlength; // terminate (window timeout)
-                        }
-                    case 'item':
-                        {
-                            assert.ok(!(iterable instanceof Window) && !(typeof iterable === 'string'), `'item' type was given when not an item.`);
-                            let item: Item = iterable;
-                            let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options);
-
-                            if (current_window) {
-                                let slot = this.retreiveSlot(current_window, item);
-
-                                if (slot) {
-                                    item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(current_window, slot, item.options);
-                                    break;
-                                }
-                            }
-                            i = pathlength;
-                        }
+                if (iterable instanceof Window) {
+                    current_window = iterable;
                 }
+
+                else if (typeof iterable === 'object' || typeof iterable === 'string') {
+                    let item: Item = typeof iterable === 'string' ? { display: iterable } : iterable;
+                    let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options);
+
+                    if (current_window) {
+                        let slot = this.retreiveSlot(current_window, item);
+
+                        if (slot) {
+                            item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(current_window, slot, item.options);
+                            continue;
+                        }
+
+                        if (i+1 === pathlength) return current_window;
+                        else throw new Error(`Item '${item.display}' was not found in GUI Window #${i}.`);
+                    }
+                    // no current window; now what?
+                }
+                return null;
             }
             return current_window;
         }
