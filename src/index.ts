@@ -113,31 +113,27 @@ export namespace mineflayer_gui {
         // If path begins with a string/Item, will begin by searching hotbar.
         // If path contains a window, will begin search from there
         async retreiveWindow(...path: ((string | Item | Window)[])): Promise<Window | null> {
-            let current_window: (Window | null) = null
+            let current_window: (Window | null) = this.bot.inventory;
+
             for (let i = 0, pathlength = path.length; i < pathlength; i++) {
                 let iterable = path[i];
                 assert.ok(!(iterable instanceof Window) || iterable instanceof Window && i < 1, `Window can only be referenced at beginning of path.`);
 
                 if (iterable instanceof Window) {
                     current_window = iterable;
+                    continue;
                 }
 
                 else if (typeof iterable === 'object' || typeof iterable === 'string') {
                     let item: Item = typeof iterable === 'string' ? { display: iterable } : iterable;
-                    let current_window = (i < 1) ? this.bot.inventory : await this.windowEvent(item.options);
+                    let slot = this.retreiveSlot(current_window, item);
 
-                    if (current_window) {
-                        let slot = this.retreiveSlot(current_window, item);
+                    if (slot) {
+                        item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(current_window, slot, item.options);
+                        current_window = await this.windowEvent(item.options);
 
-                        if (slot) {
-                            item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(current_window, slot, item.options);
-                            continue;
-                        }
-
-                        if (i+1 === pathlength) return current_window;
-                        else throw new Error(`Item '${item.display}' was not found in GUI Window #${i}.`);
+                        if (current_window) continue;
                     }
-                    // no current window; now what?
                 }
                 return null;
             }
