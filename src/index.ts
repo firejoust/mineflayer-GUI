@@ -32,21 +32,6 @@ export namespace mineflayer_gui {
             this.bot = bot;
         }
 
-        private retreiveIterableType(iterable: (string | Item | Window)): iterable_type {
-            switch (typeof iterable) {
-                case 'object': // may not work.
-                    {
-                        if (iterable instanceof Window) {
-                            return 'window';
-                        }
-                        return 'item';
-                    }
-
-                case 'string': return 'display';
-                default: throw new Error(`Invalid path value specified. Must be either a string (displayname), window, or item.`);
-            }
-        }
-
         private retreiveSlot(window: Window, item: Item): (number | null) {
             for (let slot of window.items()) {
                 let display_match = item.display && slot.customName.includes(item.display);
@@ -142,11 +127,20 @@ export namespace mineflayer_gui {
 
         async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
             assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
-            let path_referece = Array.from(path);
-            let iterable = path_referece.pop();
-            assert.ok(!(iterable instanceof Window), ``);
-            let window = await this.retreiveWindow(...path_referece);
-            let item: Item = typeof iterable === 'string' ? { display: iterable } : iterable;
+            assert.ok(!(path[path.length-1] instanceof Window), `Window cannot be referenced at the end of path.`);
+            let path_reference = Array.from(path);
+            let element = path_reference.pop();
+            let window = await this.retreiveWindow(...path_reference);
+
+            // don't execute if final path element is a window or null
+            if (window && element && !(element instanceof Window)) {
+                let item: Item = typeof element === 'string' ? { display: element } : element;
+                let slot = this.retreiveSlot(window, item);
+
+                if (slot) {
+                    return window.slots[slot];
+                }
+            }
             return null;
         }
 
