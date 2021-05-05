@@ -141,7 +141,12 @@ export namespace mineflayer_gui {
         }
 
         async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
-            let window = await this.retreiveWindow(...path);
+            assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
+            let path_referece = Array.from(path);
+            let iterable = path_referece.pop();
+            assert.ok(!(iterable instanceof Window), ``);
+            let window = await this.retreiveWindow(...path_referece);
+            let item: Item = typeof iterable === 'string' ? { display: iterable } : iterable;
             return null;
         }
 
