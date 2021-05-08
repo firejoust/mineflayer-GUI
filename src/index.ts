@@ -5,8 +5,6 @@ import assert from 'assert';
 
 export namespace mineflayer_gui {
 
-    type iterable_type = 'window' | 'display' | 'item';
-
     // options for changing click variations
     export interface ClickOptions {
         hotbar?: boolean, // if item should be selected in hotbar rather than inventory
@@ -63,13 +61,15 @@ export namespace mineflayer_gui {
         private clickHotbarSlot(slot: number, options?: ClickOptions) {
             if (slot >= 36 && slot <= 45) {
                 this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : slot - 36); // hotbar slot starts at 36, offhand at 45
-                if (options?.rightclick) {
-                    this.bot.activateItem();
-                    this.bot.deactivateItem();
-                }
+                for (let i = 0, clicks = options?.clickamount || 1; i < clicks; i++) {
+                    if (options?.rightclick) {
+                        this.bot.activateItem();
+                        this.bot.deactivateItem();
+                    }
 
-                else {
-                    this.bot.swingArm();
+                    else {
+                        this.bot.swingArm();
+                    }
                 }
                 return;
             }
@@ -127,7 +127,7 @@ export namespace mineflayer_gui {
 
         async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
             assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
-            assert.ok(!(path[path.length-1] instanceof Window), `Window cannot be referenced at the end of path.`);
+            assert.ok(!(path[path.length - 1] instanceof Window), `Window cannot be referenced at the end of path.`);
             let path_reference = Array.from(path);
             let element = path_reference.pop();
             let window = await this.retreiveWindow(...path_reference);
