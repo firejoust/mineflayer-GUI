@@ -145,6 +145,21 @@ export namespace mineflayer_gui {
         }
 
         async clickItem(...path: ((string | Item | Window)[])): Promise<boolean | null> {
+            assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
+            assert.ok(!(path[path.length - 1] instanceof Window), `Window cannot be referenced at the end of path.`);
+            let path_reference = Array.from(path);
+            let element = path_reference.pop();
+            let window = await this.retreiveWindow(...path_reference);
+
+            if (window && element && !(element instanceof Window)) {
+                let item: Item = typeof element === 'string' ? { display: element } : element;
+                let slot = this.retreiveSlot(window, item);
+                
+                if (slot) {
+                    item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(window, slot, item.options);
+                    return true;
+                }
+            }
             return null;
         }
     }
