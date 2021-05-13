@@ -51,7 +51,7 @@ export namespace mineflayer_gui {
                     windowId: window.id,
                     slot: slot,
                     mouseButton: options?.rightclick ? 1 : 0,
-                    //action: actionId,
+                    action: this.bot.createActionNumber(),
                     mode: options?.shift ? 1 : 0,
                     item: { blockId: -1 },
                 });
