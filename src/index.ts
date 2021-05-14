@@ -63,12 +63,26 @@ export namespace mineflayer_gui {
                 this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : slot - 36); // hotbar slot starts at 36, offhand at 45
                 for (let i = 0, clicks = options?.clickamount || 1; i < clicks; i++) {
                     if (options?.rightclick) {
-                        this.bot.activateItem();
-                        this.bot.deactivateItem();
+                        this.bot._client.write('use_item', {
+                            hand: slot === 45 ? 1 : 0,
+                          });
                     }
 
                     else {
+                        let click_pos = this.bot.entity.position;
+                        let click_block_face = 1;
                         this.bot.swingArm();
+
+                        this.bot._client.write('block_dig', {
+                            status: 0,
+                            location: click_pos,
+                            face: click_block_face,
+                        });
+                        this.bot._client.write('block_dig', {
+                            status: 1,
+                            location: click_pos,
+                            face: click_block_face,
+                        });
                     }
                 }
                 return;
@@ -95,7 +109,7 @@ export namespace mineflayer_gui {
         }
 
         // retreives a window object by navigating through a specified GUI path
-        // If path begins with a string/Item, will begin by searching hotbar.
+        // If path begins with a string/Item, will begin by searching inventory.
         // If path contains a window, will begin search from there
         async retreiveWindow(...path: ((string | Item | Window)[])): Promise<Window | null> {
             let current_window: (Window | null) = this.bot.inventory;
