@@ -3,8 +3,8 @@ import { plugin } from '../index';
 
 const options = {
     host: 'mezzamc.ga',
-    username: 'nozzavevo@gmail.com',
-    password: 'pizza101'
+    username: 'botty',
+    password: 'password'
 };
 
 const bot = mineflayer.createBot(options);
