@@ -56,7 +56,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var mineflayer = __importStar(require("mineflayer"));
-var index_1 = require("./index");
+var index_1 = require("../src/index");
 var options = {
     host: 'mezzamc.ga',
     username: 'nozzavevo@gmail.com',

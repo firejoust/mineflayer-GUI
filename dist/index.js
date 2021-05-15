@@ -42,6 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.plugin = void 0;
 var prismarine_windows_1 = require("prismarine-windows");
 var assert_1 = __importDefault(require("assert"));
+//Directly import Window Class from prismarine-windows package /lib/Window.js
 var item = require('prismarine-item')('1.16.5');
 var WindowClass = require('../node_modules/prismarine-windows/lib/Window')(item);
 ;
@@ -181,9 +182,8 @@ var plugin = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        /*DEBUG*/ this.bot.chat((path[path.length - 1] instanceof WindowClass).toString());
-                        /*DEBUG*/
-                        /*DEBUG*/
+                        /* Example usage of WindowClass to use instanceof */
+                        this.bot.chat((path[path.length - 1] instanceof WindowClass).toString());
                         assert_1.default.ok(path.length > 1 || !(path[0] instanceof prismarine_windows_1.Window), "Path must include at least one item.");
                         assert_1.default.ok(!(path[path.length - 1] instanceof prismarine_windows_1.Window), "Window cannot be referenced at the end of path.");
                         path_reference = Array.from(path);

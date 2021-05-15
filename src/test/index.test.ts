@@ -1,5 +1,5 @@
 import * as mineflayer from 'mineflayer';
-import { plugin } from './index';
+import { plugin } from '../index';
 
 const options = {
     host: 'mezzamc.ga',
