@@ -3,6 +3,10 @@ import { Item as PrismarineItem } from 'prismarine-item'
 import { Window } from 'prismarine-windows'
 import assert from 'assert';
 
+//Directly import Window Class from prismarine-windows package /lib/Window.js
+const item = require('prismarine-item')('1.16.5')
+const WindowClass = require('../node_modules/prismarine-windows/lib/Window')(item)
+
 // options for changing click variations
 export interface ClickOptions {
     hotbar?: boolean, // if item should be selected in hotbar rather than inventory
@@ -100,7 +104,7 @@ export class plugin {
                 resolve(null);
             }
 
-            let method = (window: Window) => complete(window, timeout);
+            let method = (window: Window) => complete(window, 5);
             let timeout = setTimeout(terminate, options?.timeout || 5000);
             this.bot.once("windowOpen", method);
         });
@@ -138,9 +142,14 @@ export class plugin {
     }
 
     async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
-        console.log(typeof PrismarineItem);
+        
+        /* Example usage of WindowClass to use instanceof */
+        this.bot.chat((path[path.length-1] instanceof WindowClass).toString());
+
+
         assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
         assert.ok(!(path[path.length - 1] instanceof Window), `Window cannot be referenced at the end of path.`);
+        
         let path_reference = Array.from(path);
         let element = path_reference.pop();
         let window = await this.retreiveWindow(...path_reference);
@@ -158,6 +167,8 @@ export class plugin {
     }
 
     async clickItem(...path: ((string | Item | Window)[])): Promise<boolean | null> {
+        console.log(!(path[path.length - 1] instanceof Window));
+        
         assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
         assert.ok(!(path[path.length - 1] instanceof Window), `Window cannot be referenced at the end of path.`);
         let path_reference = Array.from(path);
