@@ -183,7 +183,7 @@ var plugin = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         /* Example usage of WindowClass to use instanceof */
-                        this.bot.chat((path[path.length - 1] instanceof WindowClass).toString());
+                        //this.bot.chat((path[path.length-1] instanceof WindowClass).toString());
                         assert_1.default.ok(path.length > 1 || !(path[0] instanceof prismarine_windows_1.Window), "Path must include at least one item.");
                         assert_1.default.ok(!(path[path.length - 1] instanceof prismarine_windows_1.Window), "Window cannot be referenced at the end of path.");
                         path_reference = Array.from(path);

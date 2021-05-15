@@ -5,7 +5,10 @@ import assert from 'assert';
 
 //Directly import Window Class from prismarine-windows package /lib/Window.js
 const item = require('prismarine-item')('1.16.5')
-const WindowClass = require('../node_modules/prismarine-windows/lib/Window')(item)
+//import WindowClass = require('../node_modules/prismarine-windows/lib/Window')(item);
+//https://stackoverflow.com/questions/42986950/how-to-define-import-variable-type
+//https://stackoverflow.com/questions/28547970/typescript-require-with-type-checking
+//https://medium.com/@steveruiz/using-a-javascript-library-without-type-declarations-in-a-typescript-project-3643490015f3
 
 // options for changing click variations
 export interface ClickOptions {
@@ -144,7 +147,7 @@ export class plugin {
     async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
         
         /* Example usage of WindowClass to use instanceof */
-        this.bot.chat((path[path.length-1] instanceof WindowClass).toString());
+        //this.bot.chat((path[path.length-1] instanceof WindowClass).toString());
 
 
         assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
