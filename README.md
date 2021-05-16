@@ -29,6 +29,7 @@ bot.once(`login`, async () => {
     display: 'Game menu',
     options: {
       hotbar: true,
+      rightclick: true,
     },
   };
   let success = await gui.clickItem(compass, `Capture The Flag`, `4v4`); // navigate through various GUI menus until '4v4' is found
