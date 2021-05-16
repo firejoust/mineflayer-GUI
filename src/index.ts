@@ -1,14 +1,7 @@
 import * as mineflayer from 'mineflayer';
 import { Item as PrismarineItem } from 'prismarine-item'
-import { Window } from 'prismarine-windows'
+import { Window as PrismarineWindow } from 'prismarine-windows'
 import assert from 'assert';
-
-//Directly import Window Class from prismarine-windows package /lib/Window.js
-const item = require('prismarine-item')('1.16.5')
-//import WindowClass = require('../node_modules/prismarine-windows/lib/Window')(item);
-//https://stackoverflow.com/questions/42986950/how-to-define-import-variable-type
-//https://stackoverflow.com/questions/28547970/typescript-require-with-type-checking
-//https://medium.com/@steveruiz/using-a-javascript-library-without-type-declarations-in-a-typescript-project-3643490015f3
 
 // options for changing click variations
 export interface ClickOptions {
@@ -35,23 +28,31 @@ export class plugin {
         this.bot = bot;
     }
 
-    private retreiveSlot(window: Window, item: Item): (number | null) {
-        for (let slot of window.items()) {
-            let display_match = item.display && slot.customName.includes(item.display);
-            let type_match = item.type && item.type === slot.displayName;
-            let data_match = item.data && item.data === slot.type;
-            let count_match = item.count && item.count === slot.count;
+    private isWindow(value: Object): boolean {
+        if ((<PrismarineWindow>value).slots) {
+            return true;
+        }
+        return false;
+    }
+
+    private retreiveSlot(window: PrismarineWindow, item: Item): (number | null) {
+        for (let slot of window.slots) {
+            if (!slot) continue;
+            let display_match = !(item.display == null) && slot.displayName.includes(item.display);
+            let type_match = !(item.type == null) && item.type === slot.name;
+            let data_match = !(item.data == null) && item.data === slot.metadata;
+            let count_match = !(item.count == null) && item.count === slot.count;
 
             // if two or more options specified, match if they are both accurate otherwise ignore.
-            let match = (!item.display || display_match) && (!item.type || type_match) && (!item.data || data_match) && (!item.count && count_match);
+            let match = (item.display == null || display_match) && (item.type == null || type_match) && (item.data == null || data_match) && (item.count == null || count_match);
             let hotbar = item.options?.hotbar && slot.slot <= 45 && slot.slot >= 36 // make sure accessible by hotbar
             if (match && !item.options?.hotbar || hotbar) return slot.slot;
         }
         return null;
     }
 
-    private clickSlot(window: Window, slot: number, options?: ClickOptions) {
-        for (let i = 0, clicks = options?.clickamount || 1; i < clicks; i++) {
+    private clickSlot(window: PrismarineWindow, slot: number, options?: ClickOptions) {
+        for (let i = 0, clicks = (options?.clickamount || 1); i < clicks; i++) {
             this.bot._client.write('window_click', {
                 windowId: window.id,
                 slot: slot,
@@ -95,9 +96,9 @@ export class plugin {
         throw new Error(`Unable to get hotbar slot of non-hotbar item.`);
     }
 
-    private async windowEvent(options?: ClickOptions): Promise<Window | null> {
-        return new Promise<Window | null>((resolve) => {
-            let complete = (window: Window, timeout: number) => {
+    private async windowEvent(options?: ClickOptions): Promise<PrismarineWindow | null> {
+        return new Promise<PrismarineWindow | null>((resolve) => {
+            let complete = (window: PrismarineWindow, timeout: number) => {
                 clearTimeout(timeout);
                 resolve(window);
             }
@@ -107,7 +108,7 @@ export class plugin {
                 resolve(null);
             }
 
-            let method = (window: Window) => complete(window, 5);
+            let method = (window: PrismarineWindow) => complete(window, 5);
             let timeout = setTimeout(terminate, options?.timeout || 5000);
             this.bot.once("windowOpen", method);
         });
@@ -116,20 +117,20 @@ export class plugin {
     // retreives a window object by navigating through a specified GUI path
     // If path begins with a string/Item, will begin by searching inventory.
     // If path contains a window, will begin search from there
-    async retreiveWindow(...path: ((string | Item | Window)[])): Promise<Window | null> {
-        let current_window: (Window | null) = this.bot.inventory;
+    async retreiveWindow(...path: ((string | Item | PrismarineWindow)[])): Promise<PrismarineWindow | null> {
+        let current_window: (PrismarineWindow | null) = this.bot.inventory;
 
         for (let i = 0, pathlength = path.length; i < pathlength; i++) {
             let iterable = path[i];
-            assert.ok(!(iterable instanceof Window) || iterable instanceof Window && i < 1, `Window can only be referenced at beginning of path.`);
+            assert.ok(!this.isWindow(iterable) || this.isWindow(iterable) && i < 1, `Window can only be referenced at beginning of path.`); // check if slots exists on object to confirm that its a window
 
-            if (iterable instanceof Window) {
-                current_window = iterable;
+            if (this.isWindow(iterable)) {
+                current_window = <PrismarineWindow>iterable;
                 continue;
             }
 
             else if (typeof iterable === 'object' || typeof iterable === 'string') {
-                let item: Item = typeof iterable === 'string' ? { display: iterable } : iterable;
+                let item: Item = typeof iterable === 'string' ? { display: iterable } : <Item>iterable;
                 let slot = this.retreiveSlot(current_window, item);
 
                 if (slot) {
@@ -144,22 +145,17 @@ export class plugin {
         return current_window;
     }
 
-    async retreiveItem(...path: ((string | Item | Window)[])): Promise<PrismarineItem | null> {
-        
-        /* Example usage of WindowClass to use instanceof */
-        //this.bot.chat((path[path.length-1] instanceof WindowClass).toString());
-
-
-        assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
-        assert.ok(!(path[path.length - 1] instanceof Window), `Window cannot be referenced at the end of path.`);
+    async retreiveItem(...path: ((string | Item | PrismarineWindow)[])): Promise<PrismarineItem | null> {
+        assert.ok(path.length > 1 || !this.isWindow(path[0]), `Path must include at least one item.`);
+        assert.ok(!this.isWindow(path[path.length - 1]), `Window cannot be referenced at the end of path.`);
         
         let path_reference = Array.from(path);
         let element = path_reference.pop();
         let window = await this.retreiveWindow(...path_reference);
 
         // don't execute if final path element is a window or null
-        if (window && element && !(element instanceof Window)) {
-            let item: Item = typeof element === 'string' ? { display: element } : element;
+        if (window && element && !(this.isWindow(element))) {
+            let item: Item = typeof element === 'string' ? { display: element } : <Item>element;
             let slot = this.retreiveSlot(window, item);
 
             if (slot) {
@@ -169,17 +165,16 @@ export class plugin {
         return null;
     }
 
-    async clickItem(...path: ((string | Item | Window)[])): Promise<boolean | null> {
-        console.log(!(path[path.length - 1] instanceof Window));
+    async clickItem(...path: ((string | Item | PrismarineWindow)[])): Promise<boolean | null> {
         
-        assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path must include at least one item.`);
-        assert.ok(!(path[path.length - 1] instanceof Window), `Window cannot be referenced at the end of path.`);
+        assert.ok(path.length > 1 || !this.isWindow(path[0]), `Path must include at least one item.`);
+        assert.ok(!this.isWindow(path[path.length - 1]), `Window cannot be referenced at the end of path.`);
         let path_reference = Array.from(path);
         let element = path_reference.pop();
         let window = await this.retreiveWindow(...path_reference);
 
-        if (window && element && !(element instanceof Window)) {
-            let item: Item = typeof element === 'string' ? { display: element } : element;
+        if (window && element && !this.isWindow(element)) {
+            let item: Item = typeof element === 'string' ? { display: element } : <Item>element;
             let slot = this.retreiveSlot(window, item);
 
             if (slot) {
