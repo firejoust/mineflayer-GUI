@@ -28,8 +28,9 @@ export class plugin {
         this.bot = bot;
     }
 
+    // a hacky way of determining if an object is a window. Does NOT type guard
     private isWindow(value: Object): boolean {
-        if ((<PrismarineWindow>value).slots) {
+        if ((value as PrismarineWindow).slots) {
             return true;
         }
         return false;
@@ -125,12 +126,12 @@ export class plugin {
             assert.ok(!this.isWindow(iterable) || this.isWindow(iterable) && i < 1, `Window can only be referenced at beginning of path.`); // check if slots exists on object to confirm that its a window
 
             if (this.isWindow(iterable)) {
-                current_window = <PrismarineWindow>iterable;
+                current_window = iterable as PrismarineWindow; // as isWindow doesn't type guard, casting is required
                 continue;
             }
 
             else if (typeof iterable === 'object' || typeof iterable === 'string') {
-                let item: Item = typeof iterable === 'string' ? { display: iterable } : <Item>iterable;
+                let item: Item = typeof iterable === 'string' ? { display: iterable } : iterable as Item;
                 let slot = this.retreiveSlot(current_window, item);
 
                 if (slot) {
@@ -155,7 +156,7 @@ export class plugin {
 
         // don't execute if final path element is a window or null
         if (window && element && !(this.isWindow(element))) {
-            let item: Item = typeof element === 'string' ? { display: element } : <Item>element;
+            let item: Item = typeof element === 'string' ? { display: element } : element as Item;
             let slot = this.retreiveSlot(window, item);
 
             if (slot) {
@@ -166,7 +167,6 @@ export class plugin {
     }
 
     async clickItem(...path: ((string | Item | PrismarineWindow)[])): Promise<boolean | null> {
-        
         assert.ok(path.length > 1 || !this.isWindow(path[0]), `Path must include at least one item.`);
         assert.ok(!this.isWindow(path[path.length - 1]), `Window cannot be referenced at the end of path.`);
         let path_reference = Array.from(path);
@@ -174,7 +174,7 @@ export class plugin {
         let window = await this.retreiveWindow(...path_reference);
 
         if (window && element && !this.isWindow(element)) {
-            let item: Item = typeof element === 'string' ? { display: element } : <Item>element;
+            let item: Item = typeof element === 'string' ? { display: element } : element as Item;
             let slot = this.retreiveSlot(window, item);
 
             if (slot) {
