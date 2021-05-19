@@ -15,6 +15,7 @@ export interface ClickOptions {
 // parameters to narrow down what to click whilst navigating a GUI
 export interface Item {
     display?: string,
+    lore?: string,
     type?: string,
     data?: number,
     count?: number,
@@ -39,13 +40,20 @@ export class plugin {
     private retreiveSlot(window: PrismarineWindow, item: Item): (number | null) {
         for (let slot of window.slots) {
             if (!slot) continue;
-            let display_match = !(item.display == null) && slot.displayName.includes(item.display);
+            let display: string = JSON.parse(slot.nbt?.value?.display?.value?.Name?.value)?.text || slot.displayName;
+            let lore: string = JSON.parse(slot.nbt?.value?.display?.value?.Name?.value)?.lore || ``;
+
+            console.log(display);
+
+            let display_match = !(item.display == null) && display.includes(item.display);
+            let lore_match = !(item.lore == null) && (lore) && lore.includes(item.lore);
+            console.log(display_match);
             let type_match = !(item.type == null) && item.type === slot.name;
             let data_match = !(item.data == null) && item.data === slot.metadata;
             let count_match = !(item.count == null) && item.count === slot.count;
 
             // if two or more options specified, match if they are both accurate otherwise ignore.
-            let match = (item.display == null || display_match) && (item.type == null || type_match) && (item.data == null || data_match) && (item.count == null || count_match);
+            let match = (item.display == null || display_match) && (item.lore == null || lore_match) && (item.type == null || type_match) && (item.data == null || data_match) && (item.count == null || count_match);
             let hotbar = item.options?.hotbar && slot.slot <= 45 && slot.slot >= 36 // make sure accessible by hotbar
             if (match && !item.options?.hotbar || hotbar) return slot.slot;
         }
