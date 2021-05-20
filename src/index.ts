@@ -9,6 +9,7 @@ export interface ClickOptions {
     rightclick?: boolean, // which mouse button to click with
     clickamount?: number, // how many times to click the gui item
     shift?: boolean, // if holding shift while clicking
+    delay?: number, // how long to wait before clicking an item
     timeout?: number, // the timeout to wait for a window to open
 }
 
@@ -42,12 +43,9 @@ export class plugin {
             if (!slot) continue;
             let display: string = JSON.parse(slot.nbt?.value?.display?.value?.Name?.value)?.text || slot.displayName;
             let lore: string = JSON.parse(slot.nbt?.value?.display?.value?.Name?.value)?.lore || ``;
-
-            console.log(display);
-
+            console.log(`${display} and ${item.display}`);
             let display_match = !(item.display == null) && display.includes(item.display);
             let lore_match = !(item.lore == null) && (lore) && lore.includes(item.lore);
-            console.log(display_match);
             let type_match = !(item.type == null) && item.type === slot.name;
             let data_match = !(item.data == null) && item.data === slot.metadata;
             let count_match = !(item.count == null) && item.count === slot.count;
@@ -66,7 +64,7 @@ export class plugin {
                 windowId: window.id,
                 slot: slot,
                 mouseButton: options?.rightclick ? 1 : 0,
-                action: 1,
+                action: Math.floor(Math.random() * 32768),
                 mode: options?.shift ? 1 : 0,
                 item: { blockId: -1 },
             });
@@ -123,6 +121,10 @@ export class plugin {
         });
     }
 
+    private async delay(ms: number) {
+        return new Promise<void>((resolve) => setTimeout(resolve, ms));
+    }
+
     // retreives a window object by navigating through a specified GUI path
     // If path begins with a string/Item, will begin by searching inventory.
     // If path contains a window, will begin search from there
@@ -143,6 +145,7 @@ export class plugin {
                 let slot = this.retreiveSlot(current_window, item);
 
                 if (slot) {
+                    await this.delay(item.options?.delay || 0);
                     item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(current_window, slot, item.options);
                     current_window = await this.windowEvent(item.options);
 
@@ -186,6 +189,7 @@ export class plugin {
             let slot = this.retreiveSlot(window, item);
 
             if (slot) {
+                await this.delay(item.options?.delay || 0);
                 item.options?.hotbar ? this.clickHotbarSlot(slot) : this.clickSlot(window, slot, item.options);
                 return true;
             }
