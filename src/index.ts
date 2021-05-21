@@ -38,22 +38,40 @@ export class plugin {
         return false;
     }
 
+    public retreiveDisplay(item: PrismarineItem): string | null {
+        return JSON.parse(item.nbt?.value?.display?.value?.Name?.value)?.text || null;
+    }
+
+    public retreiveLore(item: PrismarineItem): string | null {
+        let lore_array: (string[] | undefined) = item.nbt?.value?.display?.value?.Lore?.value?.value;
+        let lore: (string | null) = null;
+        if (lore_array) {
+            for (let line of lore_array) {
+                let content = JSON.parse(line)?.text || ``;
+                if (content) {
+                    lore = !lore ? content : `${lore}\n${content}`;
+                }
+            }
+        }
+        return lore;
+    }
+
     private retreiveSlot(window: PrismarineWindow, item: Item): (number | null) {
         for (let slot of window.slots) {
             if (!slot) continue;
-            let display: string = JSON.parse(slot.nbt?.value?.display?.value?.Name?.value)?.text || slot.displayName;
-            let lore: string = JSON.parse(slot.nbt?.value?.display?.value?.Name?.value)?.lore || ``;
-            console.log(`${display} and ${item.display}`);
-            let display_match = !(item.display == null) && display.includes(item.display);
-            let lore_match = !(item.lore == null) && (lore) && lore.includes(item.lore);
-            let type_match = !(item.type == null) && item.type === slot.name;
-            let data_match = !(item.data == null) && item.data === slot.metadata;
-            let count_match = !(item.count == null) && item.count === slot.count;
+            let display: string = this.retreiveDisplay(slot) ?? slot.displayName;
+            let lore: string = this.retreiveLore(slot) ?? ``;
+
+            let display_match = item.display != null && display.includes(item.display);
+            let lore_match = item.lore != null && lore.includes(item.lore);
+            let type_match = item.type != null && item.type === slot.name;
+            let data_match = item.data != null && item.data === slot.metadata;
+            let count_match = item.count != null && item.count === slot.count;
 
             // if two or more options specified, match if they are both accurate otherwise ignore.
             let match = (item.display == null || display_match) && (item.lore == null || lore_match) && (item.type == null || type_match) && (item.data == null || data_match) && (item.count == null || count_match);
             let hotbar = item.options?.hotbar && slot.slot <= 45 && slot.slot >= 36 // make sure accessible by hotbar
-            if (match && !item.options?.hotbar || hotbar) return slot.slot;
+            if (match && (!item.options?.hotbar || hotbar)) return slot.slot;
         }
         return null;
     }
@@ -160,7 +178,7 @@ export class plugin {
     async retreiveItem(...path: ((string | Item | PrismarineWindow)[])): Promise<PrismarineItem | null> {
         assert.ok(path.length > 1 || !this.isWindow(path[0]), `Path must include at least one item.`);
         assert.ok(!this.isWindow(path[path.length - 1]), `Window cannot be referenced at the end of path.`);
-        
+
         let path_reference = Array.from(path);
         let element = path_reference.pop();
         let window = await this.retreiveWindow(...path_reference);
