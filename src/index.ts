@@ -39,6 +39,7 @@ export class plugin {
     }
 
     public retreiveDisplay(item: PrismarineItem): string | null {
+        console.log(PrismarineItem.toNotch(item));
         return JSON.parse(item.nbt?.value?.display?.value?.Name?.value)?.text || null;
     }
 
@@ -77,6 +78,7 @@ export class plugin {
     }
 
     private clickSlot(window: PrismarineWindow, slot: number, options?: ClickOptions) {
+        console.log(`Clicking slot ${slot}`)
         for (let i = 0, clicks = (options?.clickamount || 1); i < clicks; i++) {
             this.bot._client.write('window_click', {
                 windowId: window.id,
@@ -84,7 +86,7 @@ export class plugin {
                 mouseButton: options?.rightclick ? 1 : 0,
                 action: Math.floor(Math.random() * 32768),
                 mode: options?.shift ? 1 : 0,
-                item: { blockId: -1 },
+                item: null,
             });
         }
     }
