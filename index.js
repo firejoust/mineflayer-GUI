@@ -83,11 +83,12 @@ class plugin {
     }
 
     /**
-     * Retrieves an open window's slot according to a specified item
+     * Retrieves all open window slots matching a specified item
      * @param {item} item
-     * @returns {number?}
+     * @returns {number[]}
      */
-    getSlot(item) {
+    getSlots(item) {
+        let slots = [];
         window = this.bot.currentWindow;
         assert.ok(window, `Cannot retrieve slot of undefined window.`);
 
@@ -105,12 +106,12 @@ class plugin {
 
             // Seperate normal and hotbar matching conditions
             let match = (item.display == null || display_match) && (item.lore == null || lore_match) && (item.type == null || type_match) && (item.data == null || data_match) && (item.count == null || count_match);
-            let hotbar = item.options?.hotbar && slot.slot <= 45 && slot.slot >= 36;
+            let hotbar = item.options.hotbar && slot.slot <= 45 && slot.slot >= 36;
         
             // Return first match of item
-            if (match && (!(item.options && item.options.hotbar) || hotbar)) return slot.slot;
+            if (match && (!item.options.hotbar || hotbar)) slots.push(slot.slot);
         }
-        return null;
+        return slots;
     }
 
     /**
@@ -161,23 +162,53 @@ class plugin {
         }
     }
     /**
-     * Waits for a window to open until the specified timeout.
-     * @param {options} options
-     * @return {void}  
+     * Waits for a window to open until the specified timeout
+     * @param {number} ms The timeout in milliseconds
+     * @return {Promise<void>}  
      */
-    async windowEvent(options) {
+    async windowEvent(ms) {
         let handler, timeout;
         return new Promise(function(resolve, reject) {
             handler = resolve;
-            timeout = setTimeout(reject, options.timeout);
+            timeout = setTimeout(reject, ms);
             this.bot.once(`windowOpen`, handler);
         }).finally(function() {
             this.bot.removeListener(`windowOpen`, handler);
-            clearTimeout(timeout)
+            clearTimeout(timeout);
         });
     }
 
-    async getWindow();
-    async getItem();
+    /**
+     * Retrieves a window by navigating through a specified GUI path
+     * @param {(string|item|object)[]} path
+     * @return {object?}  
+     */
+    async getWindow(...path) {
+        let path_instance = Array.from(path);
+        let starting_object = path_instance.shift();
+        let window = starting_object instanceof Window ? starting_object : this.bot.inventory;
+
+        for (let object of path_instance) {
+            assert.ok(!object instanceof Window, `Window can only be referenced at the beginning of a path.`);
+            assert.ok(typeof object === 'string' || typeof object === 'object', TypeError(`Excepted object or string in path, but got ${typeof object}.`));
+            let item = typeof object === 'string' ? { display: object, options: {} } : object;
+            let slot = this.getSlots(item)[0];
+
+            if (slot) {
+                await new Promise((resolve) => setTimeout(resolve, item.options.delay || 0));
+                this.clickSlot(slot, item.options);
+                let response = await this.windowEvent(item.options.timeout || 5000);
+
+                if (response) {
+                    window = this.bot.currentWindow;
+                    continue;
+                }
+                return null;
+            }
+        }
+        return window;
+    }
+
+    async getItems();
     async clickItem();
 }
