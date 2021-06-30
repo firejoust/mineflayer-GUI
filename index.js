@@ -1,5 +1,4 @@
 const assert = require(`assert`);
-const versions = Object.keys(require(`minecraft-data`).versionsByMinecraftVersion.pc).map((version) => {return version});
 let Item, Window;
 
 /**
@@ -48,7 +47,7 @@ class plugin {
      */
     getDisplay(item) {
         try {
-            let nbt = (versions.indexOf(this.options.version) >= versions.indexOf(`1.12.2`)) ? item.nbt.value.display.value.Name.value : item.nbt.value.display.value.Name.value;
+            let nbt = item.nbt.value.display.value.Name.value;
             return nbt || null;
         }
 
@@ -65,7 +64,7 @@ class plugin {
      */
     getLore(item) {
         try {
-            let lores = (versions.indexOf(this.options.version) >= versions.indexOf(`1.12.2`)) ? item.nbt.value.display.value.Lore.value.value : item.nbt.value.display.value.Lore.value.value;
+            let lores = item.nbt.value.display.value.Lore.value.value;
             let lore = ``;
 
             // concatenate every lore item to a single string
