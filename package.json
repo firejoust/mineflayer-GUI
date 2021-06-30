@@ -2,11 +2,8 @@
   "name": "mineflayer-gui",
   "version": "1.0.0",
   "description": "A mineflayer plugin for easy interaction with chest GUIs",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -19,8 +16,7 @@
   },
   "homepage": "https://github.com/Camezza/mineflayer-GUI#readme",
   "dependencies": {
-    "assert": "^2.0.0",
-    "mineflayer": "^3.4.0"
+    "assert": "^2.0.0"
   },
   "devDependencies": {
     "@types/assert": "^1.5.4"

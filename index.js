@@ -1,4 +1,5 @@
 const assert = require(`assert`);
+const versions = Object.keys(require(`minecraft-data`).versionsByMinecraftVersion.pc).map((version) => {return version});
 let Item, Window;
 
 /**
@@ -31,12 +32,13 @@ function init(mineflayer) {
 function inject(bot, options) {
     Item = require('prismarine-item')(options.version).Item;
     Window = require('prismarine-windows')(options.version).Window;
-    bot.gui = plugin(bot);
+    bot.gui = new plugin(bot, options);
 }
 
 class plugin {
-    constructor(bot) {
+    constructor(bot, options) {
         this.bot = bot;
+        this.options = options;
     }
 
     /**
@@ -46,9 +48,8 @@ class plugin {
      */
     getDisplay(item) {
         try {
-            let nbt = item.nbt.value.display.value.Name.value;
-            let json_nbt = JSON.parse(nbt);
-            return json_nbt.text || null;
+            let nbt = (versions.indexOf(this.options.version) >= versions.indexOf(`1.12.2`)) ? item.nbt.value.display.value.Name.value : item.nbt.value.display.value.Name.value;
+            return nbt || null;
         }
 
         catch (err) {
@@ -64,13 +65,12 @@ class plugin {
      */
     getLore(item) {
         try {
-            assert.ok(item.nbt.value.display.value.Lore.value.value instanceof Array); // item lore NBT hard-coded to this path
-            let lores = item.nbt.value.display.value.Lore.value.value;
+            let lores = (versions.indexOf(this.options.version) >= versions.indexOf(`1.12.2`)) ? item.nbt.value.display.value.Lore.value.value : item.nbt.value.display.value.Lore.value.value;
             let lore = ``;
 
             // concatenate every lore item to a single string
             for (let line of lores) {
-                let content = JSON.parse(line).text || ``;
+                let content = line;
                 lore += `\n${content}`;
             }
             return lore;
@@ -85,17 +85,18 @@ class plugin {
     /**
      * Retrieves all open window slots matching a specified item
      * @param {item} item
+     * @param {object?} window
      * @returns {number[]}
      */
-    getSlots(item) {
+    getSlots(item, window) {
         let slots = [];
-        window = this.bot.currentWindow;
-        assert.ok(window, `Cannot retrieve slot of undefined window.`);
+        let query = window ?? (this.bot.currentWindow ?? this.bot.inventory);
+        assert.ok(query, `Cannot retrieve slot of undefined window.`);
 
-        for (let slot of window.slots) {
+        for (let slot of query.slots) {
             if (!slot) continue;
-            let display = this.getDisplay(slot) || slot.displayName;
-            let lore = this.getLore(slot) || ``;
+            let display = this.getDisplay(slot) ?? slot.displayName;
+            let lore = this.getLore(slot) ?? ``;
 
             // Perform checks for each category in item
             let display_match = item.display != null && display.includes(item.display);
@@ -162,36 +163,37 @@ class plugin {
         }
     }
     /**
-     * Waits for a window to open until the specified timeout
+     * @async Waits for a window to open until the specified timeout
      * @param {number} ms The timeout in milliseconds
-     * @return {Promise<void>}  
+     * @return {Promise<boolean>}  
      */
     async windowEvent(ms) {
         let handler, timeout;
-        return new Promise(function(resolve, reject) {
-            handler = resolve;
-            timeout = setTimeout(reject, ms);
+        return new Promise((resolve) => {
+            handler = () => resolve(true);
+            timeout = setTimeout(() => resolve(false), ms);
             this.bot.once(`windowOpen`, handler);
-        }).finally(function() {
+        }).finally(() => {
             this.bot.removeListener(`windowOpen`, handler);
             clearTimeout(timeout);
         });
     }
 
     /**
-     * Retrieves a window by navigating through a specified GUI path
+     * @async Retrieves a window by navigating through a specified GUI path
      * @param {(string|item|object)[]} path
-     * @return {object?}  
+     * @return {Promise<object?>}  
      */
     async getWindow(...path) {
-        let path_instance = Array.from(path);
-        let starting_object = path_instance.shift();
-        let window = starting_object instanceof Window ? starting_object : this.bot.inventory;
+        let path_instance = [...path]
+        let starting_object = path[0] instanceof Window ? path_instance.shift() : null;
+        let window = starting_object ?? this.bot.inventory;
 
         for (let object of path_instance) {
-            assert.ok(!object instanceof Window, `Window can only be referenced at the beginning of a path.`);
+            assert.ok(!(object instanceof Window), `Window can only be referenced at the beginning of a path.`);
             assert.ok(typeof object === 'string' || typeof object === 'object', TypeError(`Excepted object or string in path, but got ${typeof object}.`));
-            let item = typeof object === 'string' ? { display: object, options: {} } : object;
+            let item = typeof object === 'string' ? { display: object } : object;
+            item.options = item.options || {};
             let slot = this.getSlots(item)[0];
 
             if (slot) {
@@ -203,12 +205,37 @@ class plugin {
                     window = this.bot.currentWindow;
                     continue;
                 }
-                return null;
             }
+            return null;
         }
         return window;
     }
 
-    async getItems();
-    async clickItem();
+    /**
+     * @async Retrieves items matching a string or item specified in the GUI path.
+     * @param {(string|item|object)[]} path
+     * @return {Promise<object[]?>} An instance of a PrismarineItem (Array)
+     */
+    async getItems(...path) {
+        assert.ok(path.length > 0, `Path must specify at least 1 item.`);
+        assert.ok(path.length > 1 || (path.length <= 1 && !(path[0] instanceof Window)), `Path cannot only be only a window. Must specify at least 1 item.`);
+        let path_instance = [...path]
+        let final_object = path_instance.pop();
+        let window = await this.getWindow(...path_instance);
+
+        if (window) {
+            let items = [];
+            let item = typeof final_object === 'string' ? { display: final_object } : final_object;
+            item.options = item.options || {};
+            let slots = this.getSlots(item, window);
+
+            for (let slot of slots) {
+                items.push(window.slots[slot]);
+            }
+            return items;
+        }
+        return null;
+    }
+
+    //async clickItem();
 }
