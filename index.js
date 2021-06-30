@@ -235,6 +235,28 @@ class plugin {
         }
         return null;
     }
+    /**
+     * @async Clicks a single item specified in the GUI path.
+     * @param {(string|item|object)[]} path
+     * @return {Promise<object>}  
+     */
+    async clickItem(...path) {
+        assert.ok(path.length > 0, `Path must specify at least 1 item.`);
+        assert.ok(path.length > 1 || (path.length <= 1 && !(path[0] instanceof Window)), `Path cannot only be only a window. Must specify at least 1 item.`);
+        let path_instance = [...path]
+        let final_object = path_instance.pop();
+        let window = await this.getWindow(...path_instance);
 
-    //async clickItem();
+        if (window) {
+            let item = typeof final_object === 'string' ? { display: final_object } : final_object;
+            item.options = item.options || {};
+            let slot = this.getSlots(item, window)[0];
+
+            if (slot) {
+                this.clickSlot(slot, item.options);
+                return window.slots[slot];
+            }
+        }
+        return null;
+    }
 }
