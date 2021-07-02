@@ -3,12 +3,13 @@ let Item, Window;
 
 /**
  * @typedef {object} options
- * @property {boolean?} hotbar If an item should be selected in the hotbar rather than the inventory
- * @property {boolean?} rightclick Which mouse button to click with
- * @property {number?} clickamount How many times to click the item
- * @property {boolean?} shift If shift should be held whilst clicking
- * @property {number?} delay How long to wait before clicking an item
- * @property {number?} timeout How long to wait for a window to open
+ * @property {boolean?} include Whether or not to check if an item includes a value rather than equating to it (Default: true)
+ * @property {boolean?} hotbar If an item should be selected in the hotbar rather than the inventory (Default: false)
+ * @property {boolean?} rightclick Which mouse button to click with (Default: false)
+ * @property {number?} clickamount How many times to click the item (Default: 1)
+ * @property {boolean?} shift If shift should be held whilst clicking (Default: false)
+ * @property {number?} delay How long in ms to wait before clicking an item (Default: 0)
+ * @property {number?} timeout How long in ms to wait for a window to open (Default: 5000)
  */
 
 /**
@@ -43,7 +44,7 @@ class plugin {
     /**
      * Retrieves a given item's display name in notchian format
      * @param item Instance of a PrismarineItem
-     * @returns {string?}
+     * @returns {string?} Display as a string
      */
     getDisplay(item) {
         try {
@@ -60,7 +61,7 @@ class plugin {
     /**
      * Retrieves the lore of a given item as a string. Lores are seperated by a newline operator (\n).
      * @param item Instance of a PrismarineItem
-     * @returns {string?}
+     * @returns {string?} Lore as a string
      */
     getLore(item) {
         try {
@@ -83,8 +84,8 @@ class plugin {
 
     /**
      * Retrieves all open window slots matching a specified item
-     * @param {item} item
-     * @param {object?} window
+     * @param {item} item The item to match
+     * @param {object?} window (Optional) The window to search in
      * @returns {number[]}
      */
     getSlots(item, window) {
@@ -94,13 +95,14 @@ class plugin {
 
         for (let slot of query.slots) {
             if (!slot) continue;
+            let include = item.options.include ?? true;
             let display = this.getDisplay(slot) ?? slot.displayName;
             let lore = this.getLore(slot) ?? ``;
 
             // Perform checks for each category in item
-            let display_match = item.display != null && display.includes(item.display);
-            let lore_match = item.lore != null && lore.includes(item.lore);
-            let type_match = item.type != null && item.type === slot.name;
+            let display_match = item.display != null && include ? display.includes(item.display) : display === item.display;
+            let lore_match = item.lore != null && include ? lore.includes(item.lore) : lore === item.lore;
+            let type_match = item.type != null && include ? slot.name.includes(item.type) : slot.name === item.type;
             let data_match = item.data != null && item.data === slot.metadata;
             let count_match = item.count != null && item.count === slot.count;
 
@@ -116,8 +118,8 @@ class plugin {
 
     /**
      * Clicks the specified item in the current window or inventory
-     * @param {number} slot
-     * @param {options} options
+     * @param {number} slot The window slot to click
+     * @param {options} options Click options
      */
     clickSlot(slot, options) {
         let clicks = options.clickamount || 1;
@@ -164,7 +166,7 @@ class plugin {
     /**
      * @async Waits for a window to open until the specified timeout
      * @param {number} ms The timeout in milliseconds
-     * @return {Promise<boolean>}  
+     * @return {Promise<boolean>} 
      */
     async windowEvent(ms) {
         let handler, timeout;
@@ -180,8 +182,8 @@ class plugin {
 
     /**
      * @async Retrieves a window by navigating through a specified GUI path
-     * @param {(string|item|object)[]} path
-     * @return {Promise<object?>}  
+     * @param {(string|item|object)[]} path The path to navigate through
+     * @return {Promise<object?>} An instance of a PrismarineWindow or null if nothing was found / an error occured.
      */
     async getWindow(...path) {
         let path_instance = [...path]
@@ -212,8 +214,8 @@ class plugin {
 
     /**
      * @async Retrieves items matching a string or item specified in the GUI path.
-     * @param {(string|item|object)[]} path
-     * @return {Promise<object[]?>} An instance of a PrismarineItem (Array)
+     * @param {(string|item|object)[]} path The path to navigate through
+     * @return {Promise<object[]?>} An instance of a PrismarineItem (Array) or null if an error occured.
      */
     async getItems(...path) {
         assert.ok(path.length > 0, `Path must specify at least 1 item.`);
@@ -237,8 +239,8 @@ class plugin {
     }
     /**
      * @async Clicks a single item specified in the GUI path.
-     * @param {(string|item|object)[]} path
-     * @return {Promise<object>}  
+     * @param {(string|item|object)[]} path The path to navigate through
+     * @return {Promise<object?>} An instance of a PrismarineItem or null if nothing was found.
      */
     async clickItem(...path) {
         assert.ok(path.length > 0, `Path must specify at least 1 item.`);
