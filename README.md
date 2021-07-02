@@ -35,13 +35,13 @@ async function loginHandler() {
     data: 0, // The metadata of an item
     count: 1, // How much of an item is present
     options: {
-      include: true,
-      hotbar: true,
-      rightclick: false,
-      clickamount: 1,
-      shift: false,
-      delay: 1000,
-      timeout: 5000,
+      include: true, // Whether or not to check if an item includes a value rather than equating to it (Default: true)
+      hotbar: true, // If an item should be selected in the hotbar rather than the inventory (Default: false)
+      rightclick: false, // Which mouse button to click with (Default: false)
+      clickamount: 1, // How many times to click the item (Default: 1)
+      shift: false, // If shift should be held whilst clicking (Default: false)
+      delay: 1000, // How long in milliseconds to wait before clicking an item (Default: 0)
+      timeout: 5000, // How long in milliseconds to wait for a window to open (Default: 5000)
     }
   }
 
