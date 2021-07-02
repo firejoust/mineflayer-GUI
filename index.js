@@ -8,16 +8,16 @@ let Item, Window;
  * @property {boolean?} rightclick Which mouse button to click with (Default: false)
  * @property {number?} clickamount How many times to click the item (Default: 1)
  * @property {boolean?} shift If shift should be held whilst clicking (Default: false)
- * @property {number?} delay How long in ms to wait before clicking an item (Default: 0)
- * @property {number?} timeout How long in ms to wait for a window to open (Default: 5000)
+ * @property {number?} delay How long in milliseconds to wait before clicking an item (Default: 0)
+ * @property {number?} timeout How long in milliseconds to wait for a window to open (Default: 5000)
  */
 
 /**
  * @typedef {object} item
- * @property {string?} display The displayed name of an item found by hovering over it with a cursor
+ * @property {string?} display The displayed name of an item
  * @property {string?} lore The lore of an item
  * @property {string?} type The type of an item
- * @property {number?} data The varying metadata of an item
+ * @property {number?} data The metadata of an item
  * @property {number?} count How much of an item is present
  * @property {options?} options
  * 
@@ -168,6 +168,7 @@ class plugin {
      * @param {number} ms The timeout in milliseconds
      * @return {Promise<boolean>} 
      */
+
     async windowEvent(ms) {
         let handler, timeout;
         return new Promise((resolve) => {

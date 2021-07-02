@@ -1,7 +1,7 @@
 {
   "name": "mineflayer-gui",
   "version": "1.0.0",
-  "description": "A mineflayer plugin for easy interaction with chest GUIs",
+  "description": "A mineflayer plugin enabling for easy management of chest GUIs",
   "main": "index.js",
   "scripts": {
   },
