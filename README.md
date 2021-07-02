@@ -8,7 +8,7 @@
 <p align="center"><i>A mineflayer plugin enabling for easy management of inventory/chest/etc GUIs</i></p>
 
 ## Installation
-- This plugin requires npm to install:
+- This plugin uses Node, and as such requires npm to install:
 ```
 npm install mineflayer-gui
 ```
@@ -75,3 +75,34 @@ function windowHandler(window) {
   }
 }
 ```
+
+## API
+### Parameters
+#### Path
+Can be any of the following:
+* An instance of a `PrismarineWindow`
+* An item object (See example)
+* A string. (Same as `{ display: string }`)
+
+Must obey the following criteria:
+* Contain at least ONE item
+* PrismarineWindow can only be referenced at the beginning of a path.
+
+#### Item
+An object used to specify various traits of an item. (NOT a `PrismarineItem`, don't mix them up!)
+
+### Methods
+#### bot.gui.clickItem (`...path`)
+* Clicks the item specified in a path. Returns an instance of a PrismarineItem or null if nothing was found.
+
+#### bot.gui.getItems (`...path`)
+* Retrieves an array of items found in the given path. Returns a PrismarineItem array or null if the window timed out.
+
+#### bot.gui.getWindow (`...path`)
+* Retrieves a window from a given path. Returns an instance of a PrismarineWindow or null if nothing was found / window timed out.
+
+#### bot.gui.getDisplay (`PrismarineItem`)
+* Gets an item's nbt display. Returns a formatted string.
+
+#### bot.gui.getLore (`PrismarineItem`)
+* Gets an item's lore. Returns a formatted string. (New lines expressed as \n)
