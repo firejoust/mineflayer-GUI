@@ -1,10 +1,9 @@
 {
   "name": "mineflayer-gui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A mineflayer plugin enabling for easy management of chest GUIs",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Camezza/mineflayer-GUI.git"
