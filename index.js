@@ -162,14 +162,14 @@ class plugin {
     /**
      * @async Waits for a window to open until the specified timeout
      * @param {number} ms The timeout in milliseconds
-     * @return {Promise<boolean>} 
+     * @return {Promise<object?>} 
      */
 
     async windowEvent(ms) {
         let handler, timeout;
         return new Promise((resolve) => {
-            handler = () => resolve(true);
-            timeout = setTimeout(() => resolve(false), ms);
+            handler = (window) => resolve(window);
+            timeout = setTimeout(() => resolve(null), ms);
             this.bot.once(`windowOpen`, handler);
         }).finally(() => {
             this.bot.removeListener(`windowOpen`, handler);
@@ -216,7 +216,7 @@ class plugin {
      */
     async getItems(...path) {
         assert.ok(path.length > 0, `Path must specify at least 1 item.`);
-        assert.ok(path.length > 1 || (path.length <= 1 && !(path[0] instanceof Window)), `Path cannot only be only a window. Must specify at least 1 item.`);
+        assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path cannot only be only a window. Must specify at least 1 item.`);
         let path_instance = [...path]
         let final_object = path_instance.pop();
         let window = await this.getWindow(...path_instance);
@@ -241,7 +241,7 @@ class plugin {
      */
     async clickItem(...path) {
         assert.ok(path.length > 0, `Path must specify at least 1 item.`);
-        assert.ok(path.length > 1 || (path.length <= 1 && !(path[0] instanceof Window)), `Path cannot only be only a window. Must specify at least 1 item.`);
+        assert.ok(path.length > 1 || !(path[0] instanceof Window), `Path cannot only be only a window. Must specify at least 1 item.`);
         let path_instance = [...path]
         let final_object = path_instance.pop();
         let window = await this.getWindow(...path_instance);
