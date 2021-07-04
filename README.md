@@ -4,8 +4,10 @@
 <img src="https://img.shields.io/github/forks/Camezza/mineflayer-GUI?style=for-the-badge">
 <img src="https://img.shields.io/github/stars/Camezza/mineflayer-GUI?style=for-the-badge">
 <img src="https://img.shields.io/github/license/Camezza/mineflayer-GUI?style=for-the-badge">
-</div>
 <p align="center"><i>A mineflayer plugin enabling for easy management of inventory/chest/etc GUIs</i></p>
+<img src="gui.gif">
+<p>(An example of what this plugin can do)</p>
+</div>
 
 ## Installation
 - This plugin uses Node, and as such requires npm to install:
@@ -16,7 +18,7 @@ npm install mineflayer-gui
 ## Example
 ```js
 const mineflayer = require(`mineflayer`);
-const mineflayer_gui = require(`mineflayer-gui`)(mineflayer);
+const mineflayer_gui = require(`mineflayer-gui`);
 
 const options = {}; // etc.
 const bot = mineflayer.createBot(options);
@@ -45,7 +47,7 @@ async function loginHandler() {
     }
   }
 
-  let status = bot.gui.clickItem(game_selector, `Capture the flag`, `Red`);
+  let status = await bot.gui.clickItem(game_selector, `Capture the flag`, `Red`);
 
   if (status) {
     bot.chat(`Joined CTF!`);
@@ -59,7 +61,7 @@ async function loginHandler() {
 
 function windowHandler(window) {
   // perhaps you want to log all items whenever a window opens. This can be done with the getItems function:
-  let items = bot.gui.getItems(window, {}); // By specifying an empty object {}, all items will be retrieved as an instance of a prismarineItem.
+  let items = await bot.gui.getItems(window, {}); // By specifying an empty object {}, all items will be retrieved as an instance of a prismarineItem.
   
   if (!items) {
     throw new Error(`Couldn't access window! Perhaps it has closed?`);
@@ -106,3 +108,6 @@ An object used to specify various traits of an item. (NOT a `PrismarineItem`, do
 
 #### bot.gui.getLore (`PrismarineItem`)
 * Gets an item's lore. Returns a formatted string. (New lines expressed as \n)
+
+#### bot.gui.windowEvent (`ms`)
+* Returns a promise of any window opened within the specified timeout, otherwise returns null.
