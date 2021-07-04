@@ -15,7 +15,9 @@
   },
   "homepage": "https://github.com/Camezza/mineflayer-GUI#readme",
   "dependencies": {
-    "assert": "^2.0.0"
+    "assert": "^2.0.0",
+    "prismarine-item": "^1.10.0",
+    "prismarine-windows": "^2.2.0"
   },
   "devDependencies": {
     "@types/assert": "^1.5.4"
