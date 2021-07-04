@@ -23,11 +23,7 @@ let Item, Window;
  * 
  */
 
-module.exports = init;
-
-function init(mineflayer) {
-    return inject;
-}
+module.exports = inject;
 
 function inject(bot, options) {
     Item = require('prismarine-item')(options.version).Item;
