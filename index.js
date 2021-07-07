@@ -1,5 +1,4 @@
 const assert = require(`assert`);
-let Item, Window;
 
 /**
  * @typedef {object} options
@@ -26,8 +25,6 @@ let Item, Window;
 module.exports = inject;
 
 function inject(bot, options) {
-    Item = require('prismarine-item')(options.version).Item;
-    Window = require('prismarine-windows')(options.version).Window;
     bot.gui = new plugin(bot, options);
 }
 
