@@ -181,8 +181,8 @@ class plugin {
      */
     async getWindow(...path) {
         let path_instance = [...path];
-        let starting_object = path_instance.shift();
-        let window = (typeof starting_object === 'object' && starting_object.slots) ? starting_object : this.bot.inventory; // instance of prismarinewindow
+        let starting_object = (typeof path[0] === 'object' && path[0].slots) ? path_instance.shift() : null;
+        let window = starting_object ?? this.bot.inventory; // instance of prismarinewindow
 
         for (let object of path_instance) {
             assert.ok(!object.slots, `Window can only be referenced at the beginning of a path.`);
@@ -215,7 +215,7 @@ class plugin {
         let path_instance = [...path]
         let final_object = path_instance.pop();
         assert.ok(path.length > 0, `Path must specify at least 1 item.`);
-        assert.ok(path.length > 1 || typeof final_object !== 'object' || !final_object.slots, `Path cannot only be only a window. Must specify at least 1 item.`);
+        assert.ok(path.length > 1 || typeof path[0] !== 'object' || !path[0].slots, `Path cannot only be only a window. Must specify at least 1 item.`);
         let window = await this.getWindow(...path_instance);
 
         if (window) {
@@ -237,10 +237,10 @@ class plugin {
      * @return {Promise<object?>} An instance of a PrismarineItem or null if nothing was found.
      */
     async clickItem(...path) {
-        assert.ok(path.length > 0, `Path must specify at least 1 item.`);
-        assert.ok(path.length > 1 || !path.slots, `Path cannot only be only a window. Must specify at least 1 item.`);
         let path_instance = [...path]
         let final_object = path_instance.pop();
+        assert.ok(path.length > 0, `Path must specify at least 1 item.`);
+        assert.ok(path.length > 1 || typeof path[0] !== 'object' || !path[0].slots, `Path cannot only be only a window. Must specify at least 1 item.`);
         let window = await this.getWindow(...path_instance);
 
         if (window) {
