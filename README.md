@@ -93,6 +93,9 @@ Must obey the following criteria:
 #### Item
 An object used to specify various traits of an item. (NOT a `PrismarineItem`, don't mix them up!)
 
+#### event
+Either "windowOpen" or "windowClose" depending on which you want to listen for.
+
 ### Methods
 #### bot.gui.clickItem (`...path`)
 * Clicks the item specified in a path. Returns an instance of a PrismarineItem or null if nothing was found.
@@ -109,5 +112,5 @@ An object used to specify various traits of an item. (NOT a `PrismarineItem`, do
 #### bot.gui.getLore (`PrismarineItem`)
 * Gets an item's lore. Returns a formatted string. (New lines expressed as \n)
 
-#### bot.gui.windowEvent (`ms`)
-* Returns a promise of any window opened within the specified timeout, otherwise returns null.
+#### bot.gui.windowEvent (`event`, `ms`)
+* Returns a promise of any window opened/closed within the specified timeout, otherwise returns null.

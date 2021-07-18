@@ -157,20 +157,22 @@ class plugin {
             this.bot.clickWindow(slot, options.rightclick ? 1 : 0, options.shift ? 1 : 0);
         }
     }
+
     /**
-     * @async Waits for a window to open until the specified timeout
+     * @async Waits for a window to open/close until the specified timeout
+     * @param {string} event Either "windowOpen" or "windowClose".
      * @param {number} ms The timeout in milliseconds
      * @return {Promise<object?>} 
      */
-
-    async windowEvent(ms) {
+    async windowEvent(event, ms) {
+        assert.ok(event === 'windowOpen' || event === 'windowClose', `Invalid window event specified. Must be "windowOpen" or "windowClose".`);
         let handler, timeout;
         return new Promise((resolve) => {
             handler = (window) => resolve(window);
             timeout = setTimeout(() => resolve(null), ms);
-            this.bot.once(`windowOpen`, handler);
+            this.bot.once(event, handler);
         }).finally(() => {
-            this.bot.removeListener(`windowOpen`, handler);
+            this.bot.removeListener(event, handler);
             clearTimeout(timeout);
         });
     }
@@ -183,6 +185,12 @@ class plugin {
     async getWindow(...path) {
         let path_instance = [...path];
         let starting_object = (typeof path[0] === 'object' && path[0].slots) ? path_instance.shift() : null;
+
+        // Close currently open window if not explicitly specified in path
+        if (!starting_object && this.bot.currentWindow) {
+            this.bot.closeWindow(this.bot.currentWindow);
+        }
+
         let window = starting_object ?? this.bot.inventory; // instance of prismarinewindow
 
         for (let object of path_instance) {
@@ -192,10 +200,10 @@ class plugin {
             item.options = item.options || {};
             let slot = this.getSlots(item)[0]; // get the first result
 
-            if (slot) {
+            if (typeof slot === 'number') {
                 await new Promise((resolve) => setTimeout(resolve, item.options.delay || 0));
                 this.clickSlot(slot, item.options);
-                let response = await this.windowEvent(item.options.timeout || 5000);
+                let response = await this.windowEvent(`windowOpen`, item.options.timeout || 5000);
 
                 if (response) {
                     window = this.bot.currentWindow;
@@ -249,9 +257,10 @@ class plugin {
             item.options = item.options || {};
             let slot = this.getSlots(item, window)[0];
 
-            if (slot) {
+            if (typeof slot === 'number') {
+                let prismarineitem = window.slots[slot];
                 this.clickSlot(slot, item.options);
-                return window.slots[slot];
+                return prismarineitem;
             }
         }
         return null;
