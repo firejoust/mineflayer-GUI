@@ -93,8 +93,6 @@ class plugin {
             let lore = this.getLore(slot) ?? ``;
 
             // Perform checks for each category in item
-            console.log(item.display);
-            console.log('display' in item && include ? display.includes(item.display) : display === item.display);
             let display_match = 'display' in item && include ? display.includes(item.display) : display === item.display;
             let lore_match = 'lore' in item && include ? lore.includes(item.lore) : lore === item.lore;
             let type_match = 'type' in item && include ? slot.name.includes(item.type) : slot.name === item.type;
@@ -122,6 +120,7 @@ class plugin {
 
         if (hotbar) {
             assert.ok(slot >= 36 && slot <= 45, `Cannot click slot that isn't present in hotbar`);
+            this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : slot - 36); // hotbar slot starts at 36, offhand at 45
 
             // Right click mode in hotbar is using an item
             if (options.rightclick) {
@@ -185,7 +184,6 @@ class plugin {
         let path_instance = [...path];
         let starting_object = (typeof path[0] === 'object' && path[0].slots) ? path_instance.shift() : null;
         let window = starting_object ?? this.bot.inventory; // instance of prismarinewindow
-        console.log(path_instance);
 
         for (let object of path_instance) {
             assert.ok(!object.slots, `Window can only be referenced at the beginning of a path.`);
