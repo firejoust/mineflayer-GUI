@@ -93,14 +93,14 @@ class plugin {
             let lore = this.getLore(slot) ?? ``;
 
             // Perform checks for each category in item
-            let display_match = item.display != null && include ? display.includes(item.display) : display === item.display;
-            let lore_match = item.lore != null && include ? lore.includes(item.lore) : lore === item.lore;
-            let type_match = item.type != null && include ? slot.name.includes(item.type) : slot.name === item.type;
-            let data_match = item.data != null && item.data === slot.metadata;
-            let count_match = item.count != null && item.count === slot.count;
+            let display_match = 'display' in item && include ? display.includes(item.display) : display === item.display;
+            let lore_match = 'lore' in item && include ? lore.includes(item.lore) : lore === item.lore;
+            let type_match = 'type' in item && include ? slot.name.includes(item.type) : slot.name === item.type;
+            let data_match = 'data' in item && item.data === slot.metadata;
+            let count_match = 'count' in item && item.count === slot.count;
 
             // Seperate normal and hotbar matching conditions
-            let match = (item.display == null || display_match) && (item.lore == null || lore_match) && (item.type == null || type_match) && (item.data == null || data_match) && (item.count == null || count_match);
+            let match = (!item.display || display_match) && (!item.lore || lore_match) && (!item.type || type_match) && (!item.data || data_match) && (!item.count || count_match);
             let hotbar = item.options.hotbar && slot.slot <= 45 && slot.slot >= 36;
         
             // Return first match of item
@@ -120,6 +120,7 @@ class plugin {
 
         if (hotbar) {
             assert.ok(slot >= 36 && slot <= 45, `Cannot click slot that isn't present in hotbar`);
+            this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : slot - 36); // hotbar slot starts at 36, offhand at 45
 
             // Right click mode in hotbar is using an item
             if (options.rightclick) {
