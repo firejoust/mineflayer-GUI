@@ -9,6 +9,12 @@
 <p>(An example of what this plugin can do)</p>
 </div>
 
+## Features
+- Easy and automated interaction with chest GUIs commonly used on servers
+- Automatically navigate through multiple GUI windows with a specified path
+- Click items in the hotbar, inventory or a GUI window
+- Item display and lore extraction
+
 ## Installation
 - This plugin uses Node, and as such requires npm to install:
 ```
