@@ -6,7 +6,6 @@ const assert = require(`assert`);
  * @property {boolean?} hotbar If an item should be selected in the hotbar rather than the inventory (Default: false)
  * @property {boolean?} rightclick Which mouse button to click with (Default: false)
  * @property {number?} clickamount How many times to click the item (Default: 1)
- * @property {boolean?} shift If shift should be held whilst clicking (Default: false)
  * @property {number?} delay How long in milliseconds to wait before clicking an item (Default: 0)
  * @property {number?} timeout How long in milliseconds to wait for a window to open (Default: 5000)
  */
@@ -154,7 +153,7 @@ class plugin {
 
         // click slot in window by default
         for (let counter = 0; counter < clicks; counter++) {
-            this.bot.clickWindow(slot, options.rightclick ? 1 : 0, options.shift ? 1 : 0);
+            this.bot.clickWindow(slot, options.rightclick ? 1 : 0);
         }
     }
 

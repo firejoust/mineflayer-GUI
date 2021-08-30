@@ -47,7 +47,6 @@ async function loginHandler() {
       hotbar: true, // If an item should be selected in the hotbar rather than the inventory (Default: false)
       rightclick: false, // Which mouse button to click with (Default: false)
       clickamount: 1, // How many times to click the item (Default: 1)
-      shift: false, // If shift should be held whilst clicking (Default: false)
       delay: 1000, // How long in milliseconds to wait before clicking an item (Default: 0)
       timeout: 5000, // How long in milliseconds to wait for a window to open (Default: 5000)
     }
