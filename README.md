@@ -6,7 +6,7 @@
 <img src="https://img.shields.io/github/license/Camezza/mineflayer-GUI?style=for-the-badge">
 <p align="center"><i>A mineflayer plugin enabling for easy management of inventory/chest/etc GUIs</i></p>
 <img src="gui.gif">
-<p>(An example of what this plugin can do)</p>
+<p>(An example of what this plugin can automate)</p>
 </div>
 
 ## Features
