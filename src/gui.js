@@ -10,17 +10,16 @@ module.exports = class {
     #advanceWindow(window, slot, hotbar) {
         // click item directly from the hotbar
         if (hotbar) {
-            if (slot > 45 || slot < 36) throw Error(`Slot #${slot} does not lie within hotbar range! (36-45)`);
-            this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : slot - 36);
-            this.bot._client.write('use_item', {
-                hand: slot === 45 ? 1 : 0, // offhand slot uses opposite arm
-            });
+            assert.ok(36 <= slot && slot <= 45, `Slot #${slot} does not lie within hotbar range! (36-45)`);
+            this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : (slot - 36));
+            this.bot.activateItem(slot === 45);
+            this.bot.deactivateItem();
         }
         // click item from a gui window
         else {
             this.bot._client.write("window_click", {
+                slot,
                 windowId: window.id,
-                slot: match,
                 mouseButton: 0,
                 mode: 0,
             });
@@ -38,7 +37,7 @@ module.exports = class {
             let itemData = this.bot.gui.item.getSimpleItem(item);
 
             comparisons.forEach(comparison => {
-                valid = valid && comparison(query, itemData, options.colour, options.include);
+                valid = valid && comparison(query, itemData, options.color, options.include);
             });
 
             if (valid) slots.push(item.slot);
