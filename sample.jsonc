@@ -1,0 +1,27 @@
+/*
+**  An example of a SimpleItem and its properties.
+*/
+
+{
+    "type": "netherite_sword",
+    "count": 1,
+    "name": null, // ChatMessage. See README.md/API "types"
+    "lore": [
+      null, // Also a ChatMessage
+      null
+    ],
+    "enchantments": [ 
+      { 
+        "lvl": 2, 
+        "name": "knockback" 
+      }, 
+      { 
+        "lvl": 5, 
+        "name": "sharpness" 
+      } 
+    ],
+    "durability": { 
+      "max": 2031, 
+      "current": 400
+    }
+  }

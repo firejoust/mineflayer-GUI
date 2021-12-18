@@ -15,6 +15,9 @@ const onceTimeout = (emitter, event, listener, ms) => new Promise(resolve => {
     }
 });
 
+const noop = () => true;
+
 module.exports = {
-    onceTimeout
+    onceTimeout,
+    noop
 }
