@@ -22,11 +22,11 @@
 **  Types
 */
 
-class PrismarineItem {} // https://github.com/PrismarineJS/prismarine-item/blob/f8f80e992423efc4bb975eeb946dab92d389cf7b/index.d.ts#L7-L27
-class PrismarineWindow {} // https://github.com/PrismarineJS/prismarine-windows/blob/55c8a6a71cc66a54b9ead4f48370884b9a0e8665/index.d.ts#L7-L191
-class ChatMessage {} // https://github.com/PrismarineJS/prismarine-chat/blob/278b053a1a97ab6c0788d97c75f915461430b221/index.d.ts#L5-L64
-SimpleItem = Object // see sample.jsonc
-path = string OR SimpleItem // see sample.jsonc for SimpleItem. String is identical to { type: "string" }
+class PrismarineItem // https://github.com/PrismarineJS/prismarine-item/blob/f8f80e992423efc4bb975eeb946dab92d389cf7b/index.d.ts#L7-L27
+class PrismarineWindow // https://github.com/PrismarineJS/prismarine-windows/blob/55c8a6a71cc66a54b9ead4f48370884b9a0e8665/index.d.ts#L7-L191
+class ChatMessage // https://github.com/PrismarineJS/prismarine-chat/blob/278b053a1a97ab6c0788d97c75f915461430b221/index.d.ts#L5-L64
+class SimpleItem // see sample.jsonc
+path = String OR SimpleItem // see sample.jsonc for SimpleItem. String is identical to { type: "string" }
 ```
 ### Item
 - This plugin includes a wrapper for representing items in a simpler way (credit: [u9g](https://github.com/u9g/simple-item))
