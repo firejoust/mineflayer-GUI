@@ -7,7 +7,7 @@ module.exports = class {
         this.bot = bot;
     }
 
-    #advanceWindow(window, slot, hotbar) {
+    #advanceWindow(slot, hotbar) {
         // click item directly from the hotbar
         if (hotbar) {
             assert.ok(36 <= slot && slot <= 45, `Slot #${slot} does not lie within hotbar range! (36-45)`);
@@ -15,15 +15,9 @@ module.exports = class {
             this.bot.activateItem(slot === 45);
             this.bot.deactivateItem();
         }
+
         // click item from a gui window
-        else {
-            this.bot._client.write("window_click", {
-                slot,
-                windowId: window.id,
-                mouseButton: 0,
-                mode: 0,
-            });
-        }
+        else this.bot.clickWindow(slot, 0, 0);
     }
 
     getItemSlots(options, query) {
@@ -57,7 +51,7 @@ module.exports = class {
             // determine item matches in a specified window
             let match = this.getItemSlots(config, query)[0];
             if (match) {
-                this.#advanceWindow(window, match, options.hotbar && path.indexOf(object) === 0);
+                this.#advanceWindow(match, options.hotbar && path.indexOf(object) === 0);
                 let timeout = options.timeout || 5000;
                 let status = await async.onceTimeout(this.bot, "windowOpen", w => window = w, timeout);
                 if (status) continue;
@@ -92,9 +86,3 @@ module.exports = class {
         return null;
     }
 }
-
-/*
-**  Ideas:
-**  1. multiple comparisons can be specified in "options" as an array
-*/
-
