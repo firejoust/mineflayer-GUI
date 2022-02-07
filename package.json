@@ -16,9 +16,9 @@
   "homepage": "https://github.com/firejoust/mineflayer-GUI#readme",
   "dependencies": {
     "assert": "^2.0.0",
-    "minecraft-data": "^2.99.3",
-    "prismarine-chat": "^1.4.0",
-    "prismarine-nbt": "^2.0.0"
+    "minecraft-data": "^2.112.0",
+    "prismarine-chat": "^1.5.0",
+    "prismarine-nbt": "^2.2.0"
   },
   "devDependencies": {
     "@types/assert": "^1.5.4"
