@@ -46,9 +46,7 @@ bot.on("message", async json => {
         bot.chat("/settings"); // The "/settings" command will bring up a GUI window.
 
         // listen for the window and set the variable once it has been found
-        let window = null;
-        await bot.once("windowOpen", response => window = response);
-
+        let window = await new Promise(resolve => bot.once("windowOpen", response => resolve(response)));
         let options = {
             window, // We are not starting from the inventory, so the window needs to be explicitly defined
         }
