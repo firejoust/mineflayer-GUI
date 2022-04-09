@@ -1,26 +1,45 @@
 const assert = require("assert");
 const comparison = require("./util/comparison");
-const async = require("./util/async");
 
 module.exports = class {
     constructor(bot) {
         this.bot = bot;
     }
 
-    #advanceWindow(slot, hotbar) {
+    #onceTimeout = async (id, ms) => new Promise(resolve => {
+        let timeout;
+
+        let success = (...result) => {
+            clearTimeout(timeout);
+            resolve(result);
+        }
+
+        this.bot.once(id, success);
+
+        let failure = () => {
+            this.bot.removeListener(id, success);
+            resolve([]);    
+        }
+
+        timeout = setTimeout(failure, ms);
+    });
+
+    async #advanceWindow(slot, hotbar, ms) {
         // click item directly from the hotbar
-        if (hotbar) {
+        if (!hotbar) {
+            // click item from a gui window
+            await this.bot.clickWindow(slot, 0, 0);
+        } else {
             assert.ok(36 <= slot && slot <= 45, `Slot #${slot} does not lie within hotbar range! (36-45)`);
             this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : (slot - 36));
             this.bot.activateItem(slot === 45);
             this.bot.deactivateItem();
         }
-
-        // click item from a gui window
-        else this.bot.clickWindow(slot, 0, 0);
+        let response = await this.#onceTimeout("windowOpen", ms);
+        return response[0] || null;
     }
 
-    getItemSlots(options, query) {
+    #getItemSlots(options, query) {
         let window = options.window || this.bot.inventory;
         let comparisons = options.comparisons || [comparison.type];
         let slots = [];
@@ -51,10 +70,8 @@ module.exports = class {
             // determine item matches in a specified window
             let match = this.getItemSlots(config, query)[0];
             if (match) {
-                this.#advanceWindow(match, options.hotbar && path.indexOf(object) === 0);
-                let timeout = options.timeout || 5000;
-                let status = await async.onceTimeout(this.bot, "windowOpen", w => window = w, timeout);
-                if (status) continue;
+                window = await this.#advanceWindow(match, options.hotbar && path.indexOf(object) === 0, options.timeout || 5000);
+                if (window) continue;
             }
             return null;
         }

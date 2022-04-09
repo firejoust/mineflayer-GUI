@@ -5,7 +5,7 @@ function display(query, item, color, include) {
     return include ? itemName.includes(queryName) : queryName === itemName;
 }
 
-function type(query, item, color, include) {
+function type(query, item, _, include) {
     if (!query.type || !item.type) return true;
     return include ? item.type.includes(query.type) : query.type === item.type;
 }
