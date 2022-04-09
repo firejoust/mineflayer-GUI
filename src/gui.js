@@ -24,18 +24,17 @@ module.exports = class {
         timeout = setTimeout(failure, ms);
     });
 
-    async #advanceWindow(slot, hotbar, ms) {
+    async #advanceWindow(slot, options) {
         // click item directly from the hotbar
-        if (!hotbar) {
-            // click item from a gui window
-            await this.bot.clickWindow(slot, 0, 0);
+        if (!options.hotbar) {
+            await this.bot.clickWindow(slot, Number(!!options.rightclick), Number(!!options.shift));
         } else {
             assert.ok(36 <= slot && slot <= 45, `Slot #${slot} does not lie within hotbar range! (36-45)`);
             this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : (slot - 36));
             this.bot.activateItem(slot === 45);
             this.bot.deactivateItem();
         }
-        let response = await this.#onceTimeout("windowOpen", ms);
+        let response = await this.#onceTimeout("windowOpen", options.timeout || 5000);
         return response[0] || null;
     }
 
@@ -65,12 +64,14 @@ module.exports = class {
         for (let object of path) {
             let query = typeof object === "string" ? { type: object } : object;
             let config = Object.create(options);
+            // update every path iteration
             config.window = window;
+            config.hotbar = config.hotbar && path.indexOf(object) === 0;
 
             // determine item matches in a specified window
-            let match = this.getItemSlots(config, query)[0];
+            let match = this.#getItemSlots(config, query)[0];
             if (match) {
-                window = await this.#advanceWindow(match, options.hotbar && path.indexOf(object) === 0, options.timeout || 5000);
+                window = await this.#advanceWindow(match, config);
                 if (window) continue;
             }
             return null;
@@ -88,7 +89,7 @@ module.exports = class {
         let config = Object.create(options);
         config.window = window;
         // collect all item matches and place into array
-        let items = this.getItemSlots(config, query).map(slot => window.slots[slot]);
+        let items = this.#getItemSlots(config, query).map(slot => window.slots[slot]);
         return items;
     }
 

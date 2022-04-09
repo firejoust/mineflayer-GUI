@@ -81,12 +81,12 @@ async bot.gui.clickItem(options, ...path)
 options = {
     window: PrismarineWindow, // (Default: player's inventory) The window to start navigation from.
     comparisons: void[], // (Default: Item type only) An array of functions that will be used to match path items to window items (See below: "Predefined Comparisons") 
-    timeout: number, // (Default: 5000 milliseconds) How long in milliseconds to wait for a new window to open after clicking its item.
-    hotbar: boolean, // (Default: false) If the first window should be initiated from a hotbar item. (For example: Game Menu Compass)
-    color: boolean, // (Default: false) Whether or not to account for color formatting whilst comparing item display/lore(s).
-    include: boolean, // (Default: false) Whether or not path item properties should match window items if they are "included" in its own properties. (string.includes)
-    rightclick: boolean, // (clickItem ONLY) (Default: false) If an item should be right clicked in a GUI window
-    shift: boolean, // (clickItem ONLY) (Default: false) If an item should be shift clicked in a GUI window
+    timeout: number, // (Default: 5000) How long in milliseconds to wait for a new window to open after clicking its item.
+    hotbar: boolean, // (Default: false) If the first window should be initiated without opening the inventory, ie. clicking a held item.
+    color: boolean, // (Default: false) If colour formatting should be considered whilst comparing items.
+    include: boolean, // (Default: false) If strings specified in the path should be matched inclusively (similar to String.includes)
+    rightclick: boolean, // (Default: false) If ALL items in the path should be right clicked between nested windows
+    shift: boolean, // (Default: false) If ALL items in the path should be shift clicked between nested windows
 }
 
 /*
