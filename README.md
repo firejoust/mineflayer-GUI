@@ -3,30 +3,39 @@
 <img src="https://img.shields.io/npm/v/mineflayer-gui?style=flat-square">
 <img src="https://img.shields.io/github/issues-raw/firejoust/mineflayer-gui?style=flat-square">
 <img src="https://img.shields.io/github/issues-pr-raw/firejoust/mineflayer-gui?style=flat-square">
-<p align="center"><i>A mineflayer plugin enabling for easy management of inventory/chest/etc GUIs</i></p>
+<p align="center"><i>A mineflayer plugin simplifying management of nested GUI windows</i></p>
 <img src="gui.gif">
 <p>(An example of what this plugin can do)</p>
 </div>
 
 ## Features
-- Automated interaction with chest GUIs commonly used on servers
-- Effectively retrieve items from nested GUI windows with a specified path
-- Item display, lore, enchantment & durability extraction
+- Retrieve windows within nested GUI windows
+- Retrieve and click items within nested GUI windows
+- Extract item display, lore, enchantments & durability
 
 ## Example
-- See [simple.js](examples/simple.js)
+- the gif above: [gif.js](examples/gif.js)
 
 ## API
 ```js
 /*
-**  Types
+**  Type reference
 */
 
 class PrismarineItem // https://github.com/PrismarineJS/prismarine-item/blob/f8f80e992423efc4bb975eeb946dab92d389cf7b/index.d.ts#L7-L27
 class PrismarineWindow // https://github.com/PrismarineJS/prismarine-windows/blob/55c8a6a71cc66a54b9ead4f48370884b9a0e8665/index.d.ts#L7-L191
 class ChatMessage // https://github.com/PrismarineJS/prismarine-chat/blob/278b053a1a97ab6c0788d97c75f915461430b221/index.d.ts#L5-L64
-class SimpleItem // see sample.jsonc
-path = String OR SimpleItem // see sample.jsonc for SimpleItem. String is identical to { type: "string" }
+class SimpleItem // see examples/item.js
+...path = String[] OR Object[] // string is identical to object { type: "string" }
+```
+### Loading the plugin
+```js
+const gui = require("mineflayer-gui")
+
+// ...
+
+bot.loadPlugin(gui.plugin)
+
 ```
 ### Item
 - This plugin includes a wrapper for representing items in a simpler way (credit: [u9g](https://github.com/u9g/simple-item))
@@ -34,32 +43,32 @@ path = String OR SimpleItem // see sample.jsonc for SimpleItem. String is identi
 - Formatted tags such as display names and lores are represented as a [ChatMessage](https://github.com/PrismarineJS/prismarine-chat/blob/278b053a1a97ab6c0788d97c75f915461430b221/index.d.ts#L5-L64)
 ```js
 /*
-**  Item simplification
+**  SimpleItem
 */
 
-// Creates a simplified representation of a prismarineItem which can be passed onto bot.gui methods as a "path" item. (See sample.jsonc for an example)
+// Creates a simplified representation of a PrismarineItem (See examples/item.js)
 bot.gui.item.simpleItem(prismarineItem)
 
 /*
-**  Individual item methods
+**  SimpleItem methods
 */
 
-// Extracts the display name of a PrismarineItem, represented as a ChatMessage (See types for raw text extraction)
+// Extracts the display name of a PrismarineItem, represented as a ChatMessage (See examples/item.js)
 bot.gui.item.getName(prismarineItem) 
 
-// Extracts the lore of a PrismarineItem as an array of ChatMessage(s) (See types for raw text extraction)
+// Extracts the lore of a PrismarineItem as an array of ChatMessage(s) (See examples/item.js)
 bot.gui.item.getLore(prismarineItem)
 
-// Extracts an array of enchantments from a PrismarineItem, represented as an array of Objects (See sample.jsonc - "Enchantments")
+// Extracts an array of enchantments from a PrismarineItem, represented as an array of Objects (See examples/item.js)
 bot.gui.item.getEnchants(prismarineItem)
 
-// Extracts the used + total durability from a PrismarineItem, represented as an Object (See sample.jsonc - "Durability")
+// Extracts the used + total durability from a PrismarineItem, represented as an Object (See examples/item.js)
 bot.gui.item.getDurability(prismarineItem)
 ```
 ### GUI
-- The main class `bot.gui` has a collection of methods for GUI navigation & scraping items from GUI windows
-- Each of these methods begin with a "options" parameter determining how navigation between windows should be handled (See "options" below)
-- The "path" parameter is best represented as a series of items defining an order of navigating through nested GUI windows
+- the main class `bot.gui` includes methods for retrieving items/windows located in nested GUI windows
+- "options" is an object for configuring navigation behaviour between nested GUI windows
+- "path" is an array of multiple strings/objects matching items that need to be clicked (to advance GUI windows)
 ```js
 /*
 **  GUI methods
@@ -68,40 +77,40 @@ bot.gui.item.getDurability(prismarineItem)
 // Retrieves the final window from the given path. Returns an instance of a PrismarineWindow or null if nothing was found / window timed out.
 async bot.gui.getWindow(options, ...path)
 
-// Retrieves an array of PrismarineItem(s) matching the final item in the path. Returns a PrismarineItem array or null if the window timed out.
+// Retrieves the first matching item in the path. Returns a PrismarineItem or null if no matches were found.
+async bot.gui.getItem(options, ...path)
+
+// Retrieves all matching items in the path. Returns a PrismarineItem array or null if no matches were found.
 async bot.gui.getItems(options, ...path) 
 
-// Clicks the final item in the path. Returns a PrismarineItem of the item that was clicked, or null if nothing was found / window timed out.
+// Retrieves and clicks the first matching item in the path. Returns a PrismarineItem or null if no matches were found.
 async bot.gui.clickItem(options, ...path)
 
 /*
-**  Configuration Options
+**  "options" object
 */
 
 options = {
     window: PrismarineWindow, // (Default: player's inventory) The window to start navigation from.
-    comparisons: void[], // (Default: Item type only) An array of functions that will be used to match path items to window items (See below: "Predefined Comparisons") 
     timeout: number, // (Default: 5000 milliseconds) How long in milliseconds to wait for a new window to open after clicking its item.
     hotbar: boolean, // (Default: false) If the first window should be initiated from a hotbar item. (For example: Game Menu Compass)
-    color: boolean, // (Default: false) Whether or not to account for color formatting whilst comparing item display/lore(s).
+    color: boolean, // (Default: false) Whether or not to account for formatting codes (ie: item colour)
     include: boolean, // (Default: false) Whether or not path item properties should match window items if they are "included" in its own properties. (string.includes)
     rightclick: boolean, // (clickItem ONLY) (Default: false) If an item should be right clicked in a GUI window
     shift: boolean, // (clickItem ONLY) (Default: false) If an item should be shift clicked in a GUI window
 }
 
 /*
-**  Predefined Comparisons
-**  Note: comparison functions take four parameters being the path item, the window item, colour (see above "options.color") & include (see above "options.include")
+**  "...path" item
 */
 
-const gui = require("mineflayer-gui");
+match = "item_type" // the matching item type, as a String
 
-// Specify in "comparisons" if item display should be accounted for whilst comparing items.
-gui.comparison.display
+// OR:
 
-// Specify in "comparisons" if item lore should be accounted for whilst comparing items.
-gui.comparison.lore
-
-// (Included by default) Specify in "comparisons" if item types should be accounted for whilst comparing items.
-gui.comparison.type
+match = {
+    type: String, // (Optional) the matching item type, as a String
+    display: ChatMessage, // (Optional) the item display name, as a ChatMessage
+    lore: ChatMessage[] // (Optional) the item lore, as a ChatMessage array
+}
 ```
