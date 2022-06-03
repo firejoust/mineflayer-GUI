@@ -22,10 +22,10 @@
 **  Type reference
 */
 
-class PrismarineItem // https://github.com/PrismarineJS/prismarine-item/blob/f8f80e992423efc4bb975eeb946dab92d389cf7b/index.d.ts#L7-L27
-class PrismarineWindow // https://github.com/PrismarineJS/prismarine-windows/blob/55c8a6a71cc66a54b9ead4f48370884b9a0e8665/index.d.ts#L7-L191
-class ChatMessage // https://github.com/PrismarineJS/prismarine-chat/blob/278b053a1a97ab6c0788d97c75f915461430b221/index.d.ts#L5-L64
-class SimpleItem // see examples/item.js
+class PrismarineItem {} // https://github.com/PrismarineJS/prismarine-item/blob/f8f80e992423efc4bb975eeb946dab92d389cf7b/index.d.ts#L7-L27
+class PrismarineWindow {} // https://github.com/PrismarineJS/prismarine-windows/blob/55c8a6a71cc66a54b9ead4f48370884b9a0e8665/index.d.ts#L7-L191
+class ChatMessage {} // https://github.com/PrismarineJS/prismarine-chat/blob/278b053a1a97ab6c0788d97c75f915461430b221/index.d.ts#L5-L64
+class SimpleItem {} // see examples/item.js
 ...path = String[] OR Object[] // string is identical to object { type: "string" }
 ```
 ### Loading the plugin
@@ -94,12 +94,12 @@ options = {
     window: PrismarineWindow, // (Default: player's inventory) The window to start navigation from.
     delay: number, // (Default: 0) How long to wait before opening the next window
     timeout: number, // (Default: 5000) Expected duration a window should open within (in ms)
-    close: boolean // (Default: false) If the current active window should be closed beforehand
+    close: boolean, // (Default: false) If the current active window should be closed beforehand
     hotbar: boolean, // (Default: false) If the first window is initiated directly from the hotbar (ie. using an item)
     color: boolean, // (Default: false) Consider formatting codes when matching items (ie: item colour)
     include: boolean, // (Default: false) If string matching criteria should be non-strict
     rightclick: boolean, // (clickItem ONLY) (Default: false) If the final path item should be right clicked
-    shift: boolean, // (clickItem ONLY) (Default: false) If the final path item should be shift clicked
+    shift: boolean // (clickItem ONLY) (Default: false) If the final path item should be shift clicked
 }
 
 /*
