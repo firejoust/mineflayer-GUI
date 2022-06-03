@@ -1,23 +1,29 @@
-// resolves a promise after a timeout has been reached or an event has occured
-const onceTimeout = (emitter, event, listener, ms) => new Promise(resolve => {
-    let timeout = setTimeout(failure, ms)
-    emitter.once(event, success)
+const noop = _ => _
 
-    function success(...response) {
-        clearTimeout(timeout)
-        listener(...response)
-        resolve(response)
-    }
+async function once_timeout(emitter, ms, event) {
+    let timeout, success, failure
+    success = this.noop
+    failure = this.noop
 
-    function failure() {
-        emitter.removeListener(event, success); 
-        resolve(null)
-    }
-})
+    return new Promise(resolve => {
+        // clear the timeout when event triggers
+        timeout = setTimeout(failure, ms)
+        success = (...args) => {
+            clearTimeout(timeout)
+            resolve(args)
+        }
+        
+        // clear the event when timeout triggers
+        emitter.once(event, success)
+        failure = () => {
+            emitter.removeListener(success, event)
+            resolve(null)
+        }
+    })
+}
 
-const noop = () => true
 
 module.exports = {
-    onceTimeout,
-    noop
+    noop,
+    once_timeout
 }

@@ -7,7 +7,7 @@ module.exports = class {
         this.bot = bot
     }
 
-    #advanceWindow(slot, hotbar) {
+    advanceWindow(slot, hotbar) {
         // click item directly from the hotbar
         if (hotbar) {
             assert.ok(36 <= slot && slot <= 45, `Slot #${slot} does not lie within hotbar range! (36-45)`)
@@ -20,9 +20,9 @@ module.exports = class {
         else this.bot.clickWindow(slot, 0, 0)
     }
 
-    getItemSlots(options, query_item) {
-        let window = options.window || this.bot.inventory
+    getItemSlots(query_item, window, color, include) {
         let slots = []
+        
         // compare specified+slot item (find a match)
         for (let item of window.slots) {
             if (item === null || item.nbt === null) continue
@@ -41,70 +41,92 @@ module.exports = class {
                 match = match && comparison[key](
                     query_item,
                     match_item,
-                    options.color,
-                    options.include
+                    color,
+                    include
                 )
             }
 
             if (match) slots.push(item.slot)
         }
+
         return slots
     }
     
     async getWindow(options, ...path) {
-        let window = options.window || this.bot.inventory
+        // close windows that are already open
+        if (options.close && this.bot.currentWindow)
+        this.bot.closeWindow(this.bot.currentWindow)
+
+        let config = {
+            window: options.window || this.bot.inventory,
+            delay: options.delay || 0,
+            timeout: options.timeout || 5000,
+            close: options.close || false,
+            hotbar: options.hotbar || false,
+            color: options.color || false,
+            include: options.include || false,
+            rightclick: options.rightclick || false,
+            shift: options.shift || false
+        }
 
         // iterate every path item to navigate to final window
         for (let object of path) {
             let query = typeof object === "string" ? { type: object } : object
-            // clone the existing configuration
-            let config = {}
-            for (let key in options) {
-                config[key] = options[key]
-            }
-            config.window = window
+            let match = this.getItemSlots(
+                query,
+                config.window,
+                config.color,
+                config.include
+            )[0]
 
-            // determine item matches in a specified window
-            let match = this.getItemSlots(config, query)[0]
-            if (match) {
-                this.#advanceWindow(match, options.hotbar && path.indexOf(object) === 0)
-                let timeout = options.timeout || 5000
-                let status = await async.onceTimeout(this.bot, "windowOpen", w => window = w, timeout)
-                if (status) continue
+            // select the item to advance to a new window
+            if (match != undefined) {
+                this.advanceWindow(match, config.hotbar && path.indexOf(object) === 0)
+                let response = await async.once_timeout(this.bot, options.timeout, "windowOpen")
+
+                // wait before checking the next window
+                if (response != null) {
+                    config.window = response[0] // first argument is window
+                    await new Promise(resolve => setTimeout(resolve, config.delay))
+                    continue
+                }
             }
             return null
         }
-        return window
+        return config.window
     }
 
     async getItems(options, ...path) {
         assert.ok(path.length > 0, "At least one item needs to be specified in the path")
+
         // use the starting items in path to navigate to correct window
         let window = await this.getWindow(options, ...path.slice(0, -1))
         let object = path[path.length - 1]
-        // only match the last item in path
         let query = typeof object === "string" ? { type: object } : object
-        let config = {}
-        for (let key in options) {
-            config[key] = options[key]
-        }
-        config.window = window
+        if (window === null) return null
+
         // collect all item matches and place into array
-        let items = this.getItemSlots(config, query).map(slot => window.slots[slot])
-        return items
+        return this.getItemSlots(
+            query,
+            window,
+            options.color || false,
+            options.include || false
+        ).map(slot => window.slots[slot])
     }
 
     async getItem(options, ...path) {
         let items = await this.getItems(options, ...path)
-        return (items === null || items.length < 1) ? null : items[0]
+        return (items === null || items.length < 1)
+        ? null
+        : items[0]
     }
 
     async clickItem(options, ...path) {
-        let items = await this.getItems(options, ...path)
+        let item = await this.getItem(options, ...path)
 
-        if (items.length > 0) {
-            await this.bot.clickWindow(items[0].slot, Number(!!options.rightclick), Number(!!options.shift))
-            return items[0]
+        if (item) {
+            await this.bot.clickWindow(item.slot, Number(!!options.rightclick), Number(!!options.shift))
+            return item
         }
 
         return null

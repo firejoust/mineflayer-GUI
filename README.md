@@ -92,12 +92,14 @@ async bot.gui.clickItem(options, ...path)
 
 options = {
     window: PrismarineWindow, // (Default: player's inventory) The window to start navigation from.
-    timeout: number, // (Default: 5000 milliseconds) How long in milliseconds to wait for a new window to open after clicking its item.
-    hotbar: boolean, // (Default: false) If the first window should be initiated from a hotbar item. (For example: Game Menu Compass)
-    color: boolean, // (Default: false) Whether or not to account for formatting codes (ie: item colour)
-    include: boolean, // (Default: false) Whether or not path item properties should match window items if they are "included" in its own properties. (string.includes)
-    rightclick: boolean, // (clickItem ONLY) (Default: false) If an item should be right clicked in a GUI window
-    shift: boolean, // (clickItem ONLY) (Default: false) If an item should be shift clicked in a GUI window
+    delay: number, // (Default: 0) How long to wait before opening the next window
+    timeout: number, // (Default: 5000) Expected duration a window should open within (in ms)
+    close: boolean // (Default: false) If the current active window should be closed beforehand
+    hotbar: boolean, // (Default: false) If the first window is initiated directly from the hotbar (ie. using an item)
+    color: boolean, // (Default: false) Consider formatting codes when matching items (ie: item colour)
+    include: boolean, // (Default: false) If string matching criteria should be non-strict
+    rightclick: boolean, // (clickItem ONLY) (Default: false) If the final path item should be right clicked
+    shift: boolean, // (clickItem ONLY) (Default: false) If the final path item should be shift clicked
 }
 
 /*
