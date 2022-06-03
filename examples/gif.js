@@ -1,5 +1,11 @@
 const ChatMessage = require("prismarine-chat")(bot.version)
 
+// create an object for configuring navigation
+function createOptions(window) {
+    this.window = window
+    this.include = true // not matching text word for word
+}
+
 // create an object for matching "display" and "lore"
 function createItem(display, lore) {
     this.display = new ChatMessage(display)
@@ -9,7 +15,7 @@ function createItem(display, lore) {
 }
 
 async function example(window) {
-    let options = { window }
+    let options = new createOptions(window)
     // clicks the item matching the object made with createItem
     await bot.gui.clickItem(options, new createItem("Buy", "1"))
     await bot.gui.clickItem(options, new createItem("Buy", "8"))
