@@ -3,7 +3,7 @@
 <img src="https://img.shields.io/npm/v/mineflayer-gui?style=flat-square">
 <img src="https://img.shields.io/github/issues-raw/firejoust/mineflayer-gui?style=flat-square">
 <img src="https://img.shields.io/github/issues-pr-raw/firejoust/mineflayer-gui?style=flat-square">
-<p align="center"><i>A mineflayer plugin simplifying management of nested GUI windows</i></p>
+<p align="center"><i>A mineflayer plugin for managing nested GUI windows</i></p>
 <img src="gui.gif">
 <p>(An example of what this plugin can do)</p>
 </div>
