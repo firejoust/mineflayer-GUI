@@ -111,8 +111,8 @@ match = "item_type" // the matching item type, as a String
 // OR:
 
 match = {
-    type: String, // (Optional) the matching item type, as a String
-    display: ChatMessage, // (Optional) the item display name, as a ChatMessage
+    name: ChatMessage, // (Optional) the item display name, as a ChatMessage
+    type: String, // (Optional) the item type, as a String
     lore: ChatMessage[] // (Optional) the item lore, as a ChatMessage array
 }
 ```
