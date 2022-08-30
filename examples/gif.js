@@ -7,8 +7,8 @@ function createOptions(window) {
 }
 
 // create an object for matching "display" and "lore"
-function createItem(display, lore) {
-    this.display = new ChatMessage(display)
+function createItem(name, lore) {
+    this.name = new ChatMessage(name)
     this.lore = [
         new ChatMessage(lore)
     ]
