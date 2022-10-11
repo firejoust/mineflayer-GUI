@@ -10,15 +10,16 @@ module.exports = class {
     getName(prismarineItem) {
         if (prismarineItem.nbt === null) return null
         let nbt = prismarineNBT.simplify(prismarineItem.nbt)
-        if (nbt === null || !nbt?.display?.Name) return null
-        let text = nbt.display.Name
+        let text = nbt?.display?.Name || prismarineItem.name
         return new this.chatMessage(text.search(pattern) >= 0 ? JSON.parse(text) : text)
     }
 
     getLore(prismarineItem) {
         if (prismarineItem.nbt === null) return null
         let nbt = prismarineNBT.simplify(prismarineItem.nbt)
-        if (nbt === null || !nbt?.display?.Lore) return null
+        let lore = nbt?.dispay?.Lore
+        if (!lore) return null
+        
         return nbt.display.Lore.map(line => {
             return new this.chatMessage(line.search(pattern) >= 0 ? JSON.parse(line) : line)
         })
