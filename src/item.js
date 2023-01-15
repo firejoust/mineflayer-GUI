@@ -17,10 +17,10 @@ module.exports = class {
     getLore(prismarineItem) {
         if (prismarineItem.nbt === null) return null
         let nbt = prismarineNBT.simplify(prismarineItem.nbt)
-        let lore = nbt?.dispay?.Lore
+        let lore = nbt?.display?.Lore
         if (!lore) return null
         
-        return nbt.display.Lore.map(line => {
+        return lore.map(line => {
             return new this.chatMessage(line.search(pattern) >= 0 ? JSON.parse(line) : line)
         })
     }
