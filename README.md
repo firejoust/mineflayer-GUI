@@ -11,7 +11,7 @@
 ## Description
 This plugin is specifically for interacting with GUI menus. It is not designed for inventory management. It aims to make clicking items in a sequence easier, removing the need to manipulate specific slots and manually write item checks. Matching items is done through text matching (or text inclusion) for different item properties represented as strings.
 
-Windows are treated as objects, and can be used as a parameter in higher level functions (finding matching items in a window, clicking items, etc). Multiple items can be specific in a single function, with each item in sequence expected to open a new window. **Note that "item" in this case is an object defined by the developer, not a `PrismarineItem` returned by the GUI functions. See "match" at the bottom**
+Windows are treated as objects, and can be used as a parameter in higher level functions (finding matching items in a window, clicking items, etc). Multiple items can be specific in a single function, with each item (match) in sequence expected to open a new window. **Note that "item" in this case is an object defined by the developer, not a `PrismarineItem` returned by the GUI functions. See "match" at the bottom**
 
 Additionally there is a wrapper for simplifying items returned by the GUI functions. This will make it easier to extract their properties (display name, type, enchantments...). An instance of a `SimpleItem` can be created from a `PrismarineItem` (PrismarineItem is returned from the GUI functions), which can then be used as the`"match"` parameter in the GUI functions.
 
@@ -94,7 +94,7 @@ async bot.gui.getItems(options, ...path)
 async bot.gui.clickItem(options, ...path)
 
 /*
-**  "options" object
+**  "options" - a list of configurable parameters represented as an object
 */
 
 options = {
@@ -110,7 +110,7 @@ options = {
 }
 
 /*
-**  "...path" item
+**  "...path" - a sequence of item matches represented individually as an object
 */
 
 match = "item_type" // the matching item type, as a String
