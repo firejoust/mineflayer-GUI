@@ -1,7 +1,7 @@
 {
   "name": "mineflayer-gui",
-  "version": "2.1.3",
-  "description": "A mineflayer plugin enabling for easy management of chest GUIs",
+  "version": "3.0.0",
+  "description": "Manage server-side GUIs in mineflayer using a higher level API",
   "main": "index.js",
   "scripts": {},
   "repository": {
@@ -15,10 +15,6 @@
   },
   "homepage": "https://github.com/firejoust/mineflayer-GUI#readme",
   "dependencies": {
-    "assert": "^2.0.0",
-    "minecraft-data": "^2.112.0",
-    "prismarine-chat": "^1.5.0",
-    "prismarine-nbt": "^2.2.1"
   },
   "devDependencies": {
     "@types/assert": "^1.5.4"
