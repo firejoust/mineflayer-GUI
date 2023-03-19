@@ -7,14 +7,14 @@ module.exports.inject = function inject(ChatMessage) {
         }
 
         static getType(item) {
-            return item.type
+            return item.name
         }
 
         static getDisplay(item, colourMatch) {
             if (item.nbt === null)
-                return item.name
+                return item.displayName
             else {
-                const value = Nbt.simplify(item.nbt)?.display?.Name || item.name
+                const value = Nbt.simplify(item.nbt)?.display?.Name || item.displayName
                 const message = new ChatMessage (
                     value.match(/(".*":".*")|(".*")/g) // json can be parsed
                     ? JSON.parse(value)

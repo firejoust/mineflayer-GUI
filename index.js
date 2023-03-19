@@ -5,7 +5,6 @@ module.exports.plugin = function inject(bot) {
 }
 
 function Plugin(bot) {
-    this.Query = Query.inject(bot, this.Defaults)
     this.Defaults = {
         delay: 0,
         timeout: 5000,
@@ -16,4 +15,5 @@ function Plugin(bot) {
         colourMatch: false,
         shiftHeld: false,
     }
+    this.Query = Query.inject(bot, this.Defaults)
 }

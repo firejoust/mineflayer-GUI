@@ -16,7 +16,7 @@ module.exports.inject = function inject(bot, defaults) {
         // load version dependants
         Minecraft = Minecraft(bot.majorVersion)
         ChatMessage = ChatMessage(bot.majorVersion)
-        Item = Item.inject(ChatMessage)
+        Item = Item.inject(this.ChatMessage)
 
         #Set(callback) {
             return value => {
@@ -62,6 +62,7 @@ module.exports.inject = function inject(bot, defaults) {
             an item match depends on what init properties were set
         */
         isItemMatch(index, match) {
+            if (this.#window.slots[index] === null) return false
             switch (this.#matchBy) {
                 case 'slot':
                     const slot = this.Item.getSlot(this.#window.slots[index])
@@ -86,20 +87,20 @@ module.exports.inject = function inject(bot, defaults) {
 
         async hotbarClick(slot) {
             if (slot < 45)
-                this.bot.setQuickBarSlot(slot - 36) // 0-8
+                bot.setQuickBarSlot(slot - 36) // 0-8
             
             // click slot directly from the hotbar
             switch (this.#mouseButton) {
                 case 'right':
-                    this.bot.activateItem(slot === 45)
-                    this.bot.deactivateItem()
+                    bot.activateItem(slot === 45)
+                    bot.deactivateItem()
                     break
 
                 case 'left':
                     if (slot === 45)
                         throw new Error("A match was found in the hotbar, but offhand slot cannot be left clicked")
                     else
-                        this.bot.swingArm()
+                        bot.swingArm()
                     break
 
                 default:
@@ -110,11 +111,11 @@ module.exports.inject = function inject(bot, defaults) {
         async windowClick(slot) {
             switch (this.#mouseButton) {
                 case 'right':
-                    await this.bot.clickWindow(slot, 1, Number(this.#shiftHeld))
+                    await bot.clickWindow(slot, 1, Number(this.#shiftHeld))
                     break
 
                 case 'left':
-                    await this.bot.clickWindow(slot, 0, Number(this.#shiftHeld))
+                    await bot.clickWindow(slot, 0, Number(this.#shiftHeld))
                     break
 
                 default:
@@ -125,7 +126,7 @@ module.exports.inject = function inject(bot, defaults) {
         async isWindowOpen() {
             return new Promise(resolve => {
                 const timeout = setTimeout(() => {
-                    this.bot.off("windowOpen", callback)
+                    bot.off("windowOpen", callback)
                     resolve(false)
                 }, this.#timeout)
 
@@ -135,7 +136,7 @@ module.exports.inject = function inject(bot, defaults) {
                     resolve(true)
                 }
 
-                this.bot.once("windowOpen", callback)
+                bot.once("windowOpen", callback)
             })
         }
 
@@ -148,9 +149,9 @@ module.exports.inject = function inject(bot, defaults) {
                 if (this.isItemMatch(i, match)) {
                     // match is within the hotbar
                     if (this.#window.id === bot.inventory.id && 36 <= i && i <= 45)
-                        await this.hotbarClick(slot)
+                        await this.hotbarClick(i)
                     else
-                        await this.windowClick(slot)
+                        await this.windowClick(i)
 
                     return await this.isWindowOpen()
                 }
@@ -167,11 +168,12 @@ module.exports.inject = function inject(bot, defaults) {
                 i++
             )
            
-            if (i < il) // navigate to the next window
-                if (!await this.nextWindow()) // couldn't spawn a new window
+            if (i < il)
+            { // navigate to the next window
+                if (!await this.nextWindow(matching[i])) // couldn't spawn a new window
                     return null
 
-            else // target window is open, click the item
+            } else // target window is open, click the item
                 for (let j = 0; j < this.#window.slots.length; j++)
                     if (this.isItemMatch(j, matching[il])) // an item match was found
                     {
@@ -192,11 +194,12 @@ module.exports.inject = function inject(bot, defaults) {
                 i++
             )
            
-            if (i < il) // navigate to the next window
-                if (!await this.nextWindow()) // couldn't spawn a new window
+            if (i < il)
+            { // navigate to the next window
+                if (!await this.nextWindow(matching[i])) // couldn't spawn a new window
                     return null
 
-            else // target window is open, click the item
+            } else // target window is open, click the item
                 for (let j = 0; j < this.#window.slots.length; j++)
                     if (this.isItemMatch(j, matching[il])) // an item match was found
                         items.push(this.#window.slots[j])
@@ -212,14 +215,24 @@ module.exports.inject = function inject(bot, defaults) {
                 i++
             )
 
-            if (i < il)
-                if (!await this.nextWindow())
-                    return null
-            else
-                return this.#window
+            if (!await this.nextWindow(matching[i]))
+                return null
 
-            // no matches found
-            return null
+            return this.#window
+        }
+
+        async advanceWindow(...matching) {
+            for (
+                let i = 0,
+                il = (matching.length - 1);
+                i <= il;
+                i++
+            )
+
+            if (!await this.nextWindow(matching[i]))
+                return null
+
+            return this
         }
     }
 }
