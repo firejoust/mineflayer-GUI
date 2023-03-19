@@ -85,11 +85,11 @@ module.exports.inject = function inject(bot, defaults) {
         }
 
         async hotbarClick(slot) {
-            this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : (slot - 36))
+            if (slot < 45)
+                this.bot.setQuickBarSlot(slot - 36) // 0-8
             
             // click slot directly from the hotbar
-            switch (this.#mouseButton)
-            {
+            switch (this.#mouseButton) {
                 case 'right':
                     this.bot.activateItem(slot === 45)
                     this.bot.deactivateItem()
@@ -122,7 +122,7 @@ module.exports.inject = function inject(bot, defaults) {
             }
         }
 
-        async openWindow() {
+        async isWindowOpen() {
             return new Promise(resolve => {
                 const timeout = setTimeout(() => {
                     this.bot.off("windowOpen", callback)
@@ -152,12 +152,14 @@ module.exports.inject = function inject(bot, defaults) {
                     else
                         await this.windowClick(slot)
 
-                    return await this.openWindow()
+                    return await this.isWindowOpen()
                 }
             return false // no matches found
         }
 
         async clickItems(...matching) {
+            const items = new Array()
+
             for (
                 let i = 0,
                 il = (matching.length - 1);
@@ -167,18 +169,39 @@ module.exports.inject = function inject(bot, defaults) {
            
             if (i < il) // navigate to the next window
                 if (!await this.nextWindow()) // couldn't spawn a new window
-                    break
+                    return null
 
             else // target window is open, click the item
                 for (let j = 0; j < this.#window.slots.length; j++)
                     if (this.isItemMatch(j, matching[il])) // an item match was found
+                    {
+                        items.push(this.#window.slots[j])
                         await this.windowClick(j)
+                    }
                 
-            return null // window timeout or no matches found
+            return items
         }
 
         async getItems(...matching) {
+            const items = new Array()
 
+            for (
+                let i = 0,
+                il = (matching.length - 1);
+                i <= il;
+                i++
+            )
+           
+            if (i < il) // navigate to the next window
+                if (!await this.nextWindow()) // couldn't spawn a new window
+                    return null
+
+            else // target window is open, click the item
+                for (let j = 0; j < this.#window.slots.length; j++)
+                    if (this.isItemMatch(j, matching[il])) // an item match was found
+                        items.push(this.#window.slots[j])
+                
+            return items
         }
 
         async getWindow(...matching) {
@@ -191,15 +214,12 @@ module.exports.inject = function inject(bot, defaults) {
 
             if (i < il)
                 if (!await this.nextWindow())
-                    break
-
+                    return null
             else
                 return this.#window
-            
-            return null // window timeout 
-        }
 
-        async setWindow(...matching) {
+            // no matches found
+            return null
         }
     }
 }
