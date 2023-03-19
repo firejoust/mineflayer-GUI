@@ -10,6 +10,7 @@ function Plugin(bot) {
         delay: 0,
         timeout: 5000,
         window: bot.inventory,
+        matchBy: "type",
         mouseButton: "left",
         strictMatch: false,
         colourMatch: false,
