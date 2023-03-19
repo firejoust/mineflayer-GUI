@@ -63,6 +63,10 @@ module.exports.inject = function inject(bot, defaults) {
         */
         isItemMatch(index, match) {
             switch (this.#matchBy) {
+                case 'slot':
+                    const slot = this.Item.getSlot(this.#window.slots[index])
+                    return slot === match // strictMatch doesn't apply
+
                 case 'type':
                     const type = this.Item.getType(this.#window.slots[index])
                     return (this.#strictMatch ? type === match : type.includes(match))

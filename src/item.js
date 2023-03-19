@@ -2,6 +2,10 @@ const Nbt = require('prismarine-nbt')
 
 module.exports.inject = function inject(ChatMessage) {
     return class Item {
+        static getSlot(item) {
+            return item.slot
+        }
+
         static getType(item) {
             return item.type
         }
