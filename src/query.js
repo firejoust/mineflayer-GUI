@@ -84,12 +84,77 @@ module.exports.inject = function inject(bot, defaults) {
             }
         }
 
+        async hotbarClick(slot) {
+            this.bot.setQuickBarSlot(slot === 45 ? this.bot.quickBarSlot : (slot - 36))
+            
+            // click slot directly from the hotbar
+            switch (this.#mouseButton)
+            {
+                case 'right':
+                    this.bot.activateItem(slot === 45)
+                    this.bot.deactivateItem()
+                    break
+
+                case 'left':
+                    if (slot === 45)
+                        throw new Error("A match was found in the hotbar, but offhand slot cannot be left clicked")
+                    else
+                        this.bot.swingArm()
+                    break
+
+                default:
+                    throw new TypeError("mouseButton type specified is not supported")
+            }
+        }
+
+        async windowClick(slot) {
+            switch (this.#mouseButton) {
+                case 'right':
+                    await this.bot.clickWindow(slot, 1, Number(this.#shiftHeld))
+                    break
+
+                case 'left':
+                    await this.bot.clickWindow(slot, 0, Number(this.#shiftHeld))
+                    break
+
+                default:
+                    throw new TypeError("mouseButton type specified is not supported")
+            }
+        }
+
+        async openWindow() {
+            return new Promise(resolve => {
+                const timeout = setTimeout(() => {
+                    this.bot.off("windowOpen", callback)
+                    resolve(false)
+                }, this.#timeout)
+
+                const callback = window => {
+                    this.#window = window
+                    clearTimeout(timeout)
+                    resolve(true)
+                }
+
+                this.bot.once("windowOpen", callback)
+            })
+        }
+
         /*
-            sets the current window variable to a new value
+            opens the next window by clicking the matching item
             finds the window element to click based on "match" & init properties
         */
         async nextWindow(match) {
+            for (let i = 0; i < this.#window.slots.length; i++)
+                if (this.isItemMatch(i, match)) {
+                    // match is within the hotbar
+                    if (this.#window.id === bot.inventory.id && 36 <= i && i <= 45)
+                        await this.hotbarClick(slot)
+                    else
+                        await this.windowClick(slot)
 
+                    return await this.openWindow()
+                }
+            return false // no matches found
         }
 
         async clickItems(...matching) {
@@ -107,13 +172,13 @@ module.exports.inject = function inject(bot, defaults) {
             else // target window is open, click the item
                 for (let j = 0; j < this.#window.slots.length; j++)
                     if (this.isItemMatch(j, matching[il])) // an item match was found
-                        await bot.clickItem()
+                        await this.windowClick(j)
                 
             return null // window timeout or no matches found
         }
 
         async getItems(...matching) {
-            
+
         }
 
         async getWindow(...matching) {
@@ -132,6 +197,9 @@ module.exports.inject = function inject(bot, defaults) {
                 return this.#window
             
             return null // window timeout 
+        }
+
+        async setWindow(...matching) {
         }
     }
 }
