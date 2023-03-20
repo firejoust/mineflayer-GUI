@@ -97,7 +97,7 @@ console.log(clickedItems)
   Returns the current instance of 'Query' (Builder method)
   Returns null if the window timed out
 */
-const Query = await bot.gui.advanceWindow(...matching)
+await Query.advanceWindow(...matching)
 ```
 - Intended use example:
   1. Right clicking a `compass` in the hotbar, opening a GUI window
