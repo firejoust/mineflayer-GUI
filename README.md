@@ -36,6 +36,15 @@ const Query = new bot.gui.Query()
 ```
 #### Default Setter Values
 ```js
+bot.gui.Defaults = {
+  timeout: 5000,
+  window: bot.inventory,
+  matchBy: "type",
+  mouseButton: "left",
+  shiftHeld: false,
+  strictMatch: false,
+  colourMatch: false,
+}
 ```
 #### Methods
 ```js
