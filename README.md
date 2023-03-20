@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/github/issues-pr-raw/firejoust/mineflayer-gui?style=flat-square">
 <p align="center"><i>Manage nested GUI windows in mineflayer using a high level API</i></p>
 <img src="gui.gif">
-<p>^ An example of a GUI window ^</p>
+<p>^ An example of what a GUI window would be^</p>
 </div>
 
 ### API
@@ -37,6 +37,8 @@ bot.gui.Defaults = {
 ```
 #### Constructing a "Query"
 - Note: all Setters are optional, the current window will be stored internally
+
+  (And will change per query made)
 ```js
 const Query = new bot.gui.Query()
 .timeout(number)
@@ -48,26 +50,29 @@ const Query = new bot.gui.Query()
 .colourMatch(boolean) // if true, match queries can include section sign style colour codes
 ```
 #### Methods
-Specifying multiple match queries have the same effect for all methods
+- Specifying multiple match queries will have the same effect for all methods
 
-(ie, they will bring you to the final window, with its intended functionality used by the last match query)
+  (ie, match queries will navigate to the final window, with its intended functionality executed with the last match query)
 
-If `matchBy` is `'type'`, `'display'`, or `'lore'`, Strings are used as arguments
+- If `matchBy` is `'type'`, `'display'`, or `'lore'`, Strings are used as arguments
 
-If `matchBy` is `'slot'`, Numbers are used as arguments instead of Strings.
+- If `matchBy` is `'slot'`, Numbers are used as arguments instead of Strings.
 ```ts
 /*
-  
+  Returns the final window in a sequence of match queries
+  Returns null if the window timed out
 */
 const window: PrismarineWindow? = await Query.getWindow(...matching)
 
 /*
-  
+  Returns a list of items matching the final match query
+  Returns null if the window timed out
 */
 const items: PrismarineItem[]? = await Query.getItems(...matching)
 
 /*
-  
+  Returns a list of *clicked* items matching the final match query
+  Returns null if the window timed out
 */
 const items: PrismarineItem[]? = await Query.clickItems(...matching)
 ```
