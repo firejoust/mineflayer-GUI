@@ -1,7 +1,7 @@
 {
   "name": "mineflayer-gui",
   "version": "3.0.0",
-  "description": "Manage server-side GUIs in mineflayer using a higher level API",
+  "description": "Manage nested GUI windows in mineflayer using a high level API",
   "main": "index.js",
   "scripts": {},
   "repository": {
