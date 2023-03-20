@@ -76,3 +76,39 @@ const items: PrismarineItem[]? = await Query.getItems(...matching)
 */
 const items: PrismarineItem[]? = await Query.clickItems(...matching)
 ```
+- Intended use example:
+  1. Left clicking a `compass` with the display `Game Menu` in the hotbar, opening a GUI window
+  2. Left clicking an `orange bed` with the display `Bed Wars`, opening another GUI window
+  3. Left clicking a `gold block` with the display `4v4v4v4` (Joining the lobby) 
+```js
+const clickedItems = await new bot.gui.Query()
+.matchBy('display')
+.clickItems('Game Menu', 'Bed Wars', '4v4v4v4')
+
+// "[ ...PrismarineItem, etc... ]" or "null" if one of the windows timed out
+console.log(clickedItems)
+```
+#### Chaining Queries
+- Using `bot.gui.advanceWindow`, it is possible to chain one large query from multiple complicated queries
+```ts
+/*
+  Returns the current instance of 'Query' (Builder method)
+  Returns null if the window timed out
+*/
+const Query = await bot.gui.advanceWindow(...matching)
+```
+- Intended use example:
+  1. Right clicking a `compass` in the hotbar, opening a GUI window
+  2. Left clicking `orange wool` with the display `Capture the Wool`, opening another GUI window
+  3. Left clicking `red wool` with the display `Red Team` (Joining the lobby)
+```js
+const clickedItems = await new bot.gui.Query()
+.mouseButton('right')
+.advanceWindow('compass')
+.then(Query => Query.matchBy('display')
+  .advanceWindow('Capture the Wool'))
+.then(Query => Query.clickItems('Red Team'))
+
+// "[ ...PrismarineItem, etc... ]" or "null" if one of the windows timed out
+console.log(clickedItems)
+```
