@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/github/issues-pr-raw/firejoust/mineflayer-gui?style=flat-square">
 <p align="center"><i>Manage nested GUI windows in mineflayer using a high level API</i></p>
 <img src="gui.gif">
-<p>^ An example of what a GUI window would be^</p>
+<p>^ An example of what a GUI window might be^</p>
 </div>
 
 ### API
