@@ -12,7 +12,7 @@ module.exports.inject = function inject(bot, defaults) {
         #strictMatch = defaults.strictMatch
         #colourMatch = defaults.colourMatch
 
-        // load version dependants
+        // load version dependents
         ChatMessage = ChatMessage(bot.majorVersion)
         Item = Item.inject(this.ChatMessage)
 
@@ -51,10 +51,6 @@ module.exports.inject = function inject(bot, defaults) {
             this.#shiftHeld = shiftHeld
         })
 
-        /*
-            matches the item in the current window at the index specified to the string specified
-            an item match depends on what init properties were set
-        */
         isItemMatch(index, match) {
             if (this.#window.slots[index] === null) return false
             switch (this.#matchBy) {
@@ -134,10 +130,6 @@ module.exports.inject = function inject(bot, defaults) {
             })
         }
 
-        /*
-            opens the next window by clicking the matching item
-            finds the window element to click based on "match" & init properties
-        */
         async nextWindow(match) {
             for (let i = 0; i < this.#window.slots.length; i++)
                 if (this.isItemMatch(i, match)) {
