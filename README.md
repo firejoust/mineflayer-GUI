@@ -35,6 +35,7 @@ const Query = new bot.gui.Query()
 .colourMatch(boolean) // if true, match queries can include section sign style colour codes
 ```
 #### Default Setter Values
+- If you prefer, these can be manually set after loading the plugin
 ```js
 bot.gui.Defaults = {
   timeout: 5000,
