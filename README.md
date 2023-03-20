@@ -90,6 +90,8 @@ console.log(clickedItems)
 ```
 #### Chaining Queries
 - Using `bot.gui.advanceWindow`, it is possible to chain one large query from multiple complicated queries
+  
+  "Why would I want to do this?" You can modify Setters mid-query, allowing for more concise syntax
 ```ts
 /*
   Returns the current instance of 'Query' (Builder method)
