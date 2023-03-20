@@ -9,12 +9,11 @@ module.exports.inject = function inject(bot, defaults) {
         #window      = defaults.window
         #matchBy     = defaults.matchBy
         #mouseButton = defaults.mouseButton
+        #shiftHeld   = defaults.shiftHeld
         #strictMatch = defaults.strictMatch
         #colourMatch = defaults.colourMatch
-        #shiftHeld   = defaults.shiftHeld
 
         // load version dependants
-        Minecraft = Minecraft(bot.majorVersion)
         ChatMessage = ChatMessage(bot.majorVersion)
         Item = Item.inject(this.ChatMessage)
 
