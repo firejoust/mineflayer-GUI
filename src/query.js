@@ -4,7 +4,6 @@ const Item = require("./item")
 
 module.exports.inject = function inject(bot, defaults) {
     return class Query {
-        #delay       = defaults.delay
         #timeout     = defaults.timeout
         #window      = defaults.window
         #matchBy     = defaults.matchBy
@@ -23,10 +22,6 @@ module.exports.inject = function inject(bot, defaults) {
                 return this
             }
         }
-
-        delay = this.#Set(delay => {
-            this.#delay = delay
-        })
 
         timeout = this.#Set(timeout => {
             this.#timeout = timeout

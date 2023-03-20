@@ -6,7 +6,6 @@ module.exports.plugin = function inject(bot) {
 
 function Plugin(bot) {
     this.Defaults = {
-        delay: 0,
         timeout: 5000,
         window: bot.inventory,
         matchBy: "type",
