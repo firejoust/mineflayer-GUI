@@ -101,12 +101,10 @@ module.exports.inject = function inject(bot, defaults) {
         async windowClick(slot) {
             switch (this.#mouseButton) {
                 case 'right':
-                    await bot.clickWindow(slot, 1, Number(this.#shiftHeld))
-                    break
+                    return bot.clickWindow(slot, 1, Number(this.#shiftHeld))
 
                 case 'left':
-                    await bot.clickWindow(slot, 0, Number(this.#shiftHeld))
-                    break
+                    return bot.clickWindow(slot, 0, Number(this.#shiftHeld))
 
                 default:
                     throw new TypeError("mouseButton type specified is not supported")
@@ -135,9 +133,9 @@ module.exports.inject = function inject(bot, defaults) {
                 if (this.isItemMatch(i, match)) {
                     // match is within the hotbar
                     if (this.#window.id === bot.inventory.id && 36 <= i && i <= 45)
-                        await this.hotbarClick(i)
+                        this.hotbarClick(i)
                     else
-                        await this.windowClick(i)
+                        this.windowClick(i)
 
                     return await this.isWindowOpen()
                 }
@@ -164,7 +162,7 @@ module.exports.inject = function inject(bot, defaults) {
                     if (this.isItemMatch(j, matching[il])) // an item match was found
                     {
                         items.push(this.#window.slots[j])
-                        await this.windowClick(j)
+                        this.windowClick(j)
                     }
                 
             return items
