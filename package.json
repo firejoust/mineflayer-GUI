@@ -1,6 +1,6 @@
 {
   "name": "mineflayer-gui",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "description": "Manage nested GUI windows in mineflayer using a high level API",
   "main": "index.js",
   "scripts": {},
@@ -14,8 +14,7 @@
     "url": "https://github.com/firejoust/mineflayer-GUI/issues"
   },
   "homepage": "https://github.com/firejoust/mineflayer-GUI#readme",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/assert": "^1.5.4"
   }
