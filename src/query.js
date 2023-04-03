@@ -1,6 +1,6 @@
-const Minecraft = require("minecraft-data")
-const ChatMessage = require("prismarine-chat")
-const Item = require("./item")
+const PrismarineItem = require('prismarine-item')
+const ChatMessage    = require("prismarine-chat")
+const Item           = require("./item")
 
 module.exports.inject = function inject(bot, defaults) {
     return class Query {
@@ -11,10 +11,12 @@ module.exports.inject = function inject(bot, defaults) {
         #shiftHeld   = defaults.shiftHeld
         #strictMatch = defaults.strictMatch
         #colourMatch = defaults.colourMatch
+        #packet      = defaults.packet
 
         // load version dependents
-        ChatMessage = ChatMessage(bot.majorVersion)
-        Item = Item.inject(this.ChatMessage)
+        PrismarineItem = PrismarineItem(bot.registry)
+        ChatMessage    = ChatMessage(bot.registry)
+        Item           = Item.inject(this.ChatMessage)
 
         #Set(callback) {
             return value => {
@@ -39,6 +41,10 @@ module.exports.inject = function inject(bot, defaults) {
             this.#mouseButton = mouseButton
         })
 
+        shiftHeld = this.#Set(shiftHeld => {
+            this.#shiftHeld = shiftHeld
+        })
+
         strictMatch = this.#Set(strictMatch => {
             this.#strictMatch = strictMatch
         })
@@ -47,8 +53,8 @@ module.exports.inject = function inject(bot, defaults) {
             this.#colourMatch = colourMatch
         })
 
-        shiftHeld = this.#Set(shiftHeld => {
-            this.#shiftHeld = shiftHeld
+        packet = this.#Set(packet => {
+            this.#packet = packet
         })
 
         isItemMatch(index, match) {
@@ -98,19 +104,47 @@ module.exports.inject = function inject(bot, defaults) {
             }
         }
 
-        async windowClick(slot) {
-            switch (this.#mouseButton) {
-                case 'right':
-                    await bot.clickWindow(slot, 1, Number(this.#shiftHeld))
-                    break
-
-                case 'left':
-                    await bot.clickWindow(slot, 0, Number(this.#shiftHeld))
-                    break
-
-                default:
-                    throw new TypeError("mouseButton type specified is not supported")
+        async packetClick(slot, mouseButton, mode) {
+            if (bot.supportFeature('actionIdUsed')) { // <= 1.16.5
+                bot._client.write('window_click', {
+                    action: 0, // this may cause issues if the server is checking
+                    windowId: this.#window.id,
+                    item: this.PrismarineItem.toNotch(null), // assume nothing is held
+                    mouseButton,
+                    slot,
+                    mode,
+                })
+            } else { // 1.17+
+                bot._client.write('window_click', {
+                    stateId: -1, // this may cause issues if the server is checking
+                    windowId: this.#window.id,
+                    cursorItem: this.PrismarineItem.toNotch(null),
+                    changedSlots: [],
+                    mouseButton,
+                    slot,
+                    mode,
+                })
             }
+        }
+
+        async windowClick(slot) {
+            if (this.#packet) {
+                switch (this.#mouseButton) {
+                    case 'right':
+                        return this.packetClick(slot, 1, Number(this.#shiftHeld))
+                    case 'left':
+                        return this.packetClick(slot, 0, Number(this.#shiftHeld))
+                }
+            } else {
+                switch (this.#mouseButton) {
+                    case 'right':
+                        return bot.clickWindow(slot, 1, Number(this.#shiftHeld))
+                    case 'left':
+                        return bot.clickWindow(slot, 0, Number(this.#shiftHeld))
+                }
+            }
+
+            throw new TypeError("mouseButton type specified is not supported")
         }
 
         async isWindowOpen() {

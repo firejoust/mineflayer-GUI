@@ -10,9 +10,10 @@ function Plugin(bot) {
         window: bot.inventory,
         matchBy: "type",
         mouseButton: "left",
+        shiftHeld: false,
         strictMatch: false,
         colourMatch: false,
-        shiftHeld: false,
+        packet: false
     }
     this.Query = Query.inject(bot, this.Defaults)
 }
