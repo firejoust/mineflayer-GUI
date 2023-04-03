@@ -33,6 +33,7 @@ bot.gui.Defaults = {
   shiftHeld: false,
   strictMatch: false,
   colourMatch: false,
+  packet: false
 }
 ```
 #### Constructing a "Query"
@@ -48,6 +49,7 @@ const Query = new bot.gui.Query()
 .shiftHeld(boolean) // shift-click window items
 .strictMatch(boolean) // if false, only match a portion of the query
 .colourMatch(boolean) // if true, match queries can include section sign style colour codes
+.packet(boolean) // doesn't wait for the server to respond to window transactions (Unstable!)
 ```
 #### Methods
 - Specifying multiple match queries will have the same effect for all methods
