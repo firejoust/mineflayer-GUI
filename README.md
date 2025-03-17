@@ -1,118 +1,122 @@
-<h1 align="center">mineflayer-GUI</h1>
-<div align="center">
-<img src="https://img.shields.io/npm/v/mineflayer-gui?style=flat-square">
-<img src="https://img.shields.io/github/issues-raw/firejoust/mineflayer-gui?style=flat-square">
-<img src="https://img.shields.io/github/issues-pr-raw/firejoust/mineflayer-gui?style=flat-square">
-<p align="center"><i>Manage nested GUI windows in mineflayer using a high level API</i></p>
-<img src="gui.gif">
-<p>^ An example of what a GUI window might be^</p>
-</div>
+# Mineflayer GUI
 
-### API
-#### Type Reference
-```js
-class PrismarineWindow; // link: https://is.gd/h73B5h
-class PrismarineItem;   // link: https://is.gd/ivNm7p
+This plugin provides a high-level, promise-based API for interacting with Server GUIs using [mineflayer](https://github.com/PrismarineJS/mineflayer). It simplifies common tasks like opening lobby selector GUIs in the hotbar, clicking buttons, moving items between slots, and dropping items. The API is designed to be chainable and asynchronous, making complex GUI window management sequences easy to write and read.
+
+## Installation
+
+```bash
+npm install mineflayer
+npm install mineflayer-gui
 ```
-#### Loading the plugin
-```js
-const gui = require("mineflayer-gui")
 
-...
+## Usage
 
-bot.loadPlugin(gui.plugin)
+```javascript
+const mineflayer = require('mineflayer');
+const gui = require('mineflayer-gui');
+
+const bot = mineflayer.createBot({
+  host: 'localhost',
+  port: 25565,
+  username: 'MyBot',
+});
+
+bot.loadPlugin(gui)
+
+// Example comparator - checks if item display name includes the argument
+const comparator = (arg, item) => item.displayName.includes(arg);
+
+bot.once('spawn', async () => {
+  // Example query
+  const query = bot.gui.Query()
+    .Hotbar(comparator)
+      .Open("Clock", "right") // Right click the Clock, and wait for the GUI window to open (default timeout: 5000ms)
+    .end()
+    .Window(comparator)
+      .Click("Grass Block") // Left click the Grass Block
+      .Click("Lime Bed") // Left click the Lime Bed
+    .close() // same as 'end', but closes the window automatically
+
+  const result = await query.run();
+
+  // Result is a boolean 
+  if (result) {
+    console.log("Query executed successfully!");
+  } else {
+    console.log("Something went wrong.");
+  }
+});
 ```
-#### Default Setter Values
-- If you prefer, these can be manually set after loading the plugin
-```js
-bot.gui.Defaults = {
-  timeout: 5000,
-  window: bot.inventory,
-  matchBy: "type",
-  mouseButton: "left",
-  shiftHeld: false,
-  strictMatch: false,
-  colourMatch: false,
-  packet: false
-}
-```
-#### Constructing a "Query"
-- Note: all Setters are optional, the current window will be stored internally
 
-  (And will change per query made)
-```js
-const Query = new bot.gui.Query()
-.timeout(number)
-.window(PrismarineWindow) // the starting window (inventory by default)
-.matchBy('slot' | 'type' | 'display' | 'lore')
-.mouseButton('left' | 'right')
-.shiftHeld(boolean) // shift-click window items
-.strictMatch(boolean) // if false, only match a portion of the query
-.colourMatch(boolean) // if true, match queries can include section sign style colour codes
-.packet(boolean) // doesn't wait for the server to respond to window transactions (Unstable!)
-```
-#### Methods
-- Specifying multiple match queries will have the same effect for all methods
+## API Reference
 
-  (ie, match queries will navigate to the final window, with its intended functionality executed with the last match query)
+### `bot.gui.Query()`
 
-- If `matchBy` is `'type'`, `'display'`, or `'lore'`, Strings are used as arguments
+Creates a new query object. This is the starting point for all inventory operations. **Note:** Does **not** require `new` operator.
 
-- If `matchBy` is `'slot'`, Numbers are used as arguments instead of Strings.
-```ts
-/*
-  Returns the final window in a sequence of match queries
-  Returns null if the window timed out
-*/
-const window: PrismarineWindow? = await Query.getWindow(...matching)
+### `Query`
 
-/*
-  Returns a list of items matching the final match query
-  Returns null if the window timed out
-*/
-const items: PrismarineItem[]? = await Query.getItems(...matching)
+The main query object. Methods return selector objects (Hotbar, Window, Inventory) for further chaining.
 
-/*
-  Returns a list of *clicked* items matching the final match query
-  Returns null if the window timed out
-*/
-const items: PrismarineItem[]? = await Query.clickItems(...matching)
-```
-- Intended use example:
-  1. Left clicking a `compass` with the display `Game Menu` in the hotbar, opening a GUI window
-  2. Left clicking an `orange bed` with the display `Bed Wars`, opening another GUI window
-  3. Left clicking a `gold block` with the display `4v4v4v4` (Joining the lobby) 
-```js
-const clickedItems = await new bot.gui.Query()
-.matchBy('display')
-.clickItems('Game Menu', 'Bed Wars', '4v4v4v4')
+*   `.Hotbar(comparator)`: Selects the hotbar for operations.
+*   `.Window(comparator)`: Selects the currently open window (chest, furnace, etc.).  Accepts a comparator function or a string, like `.Hotbar()`.
+*   `.Inventory(comparator)`: Selects the player's inventory. Accepts a comparator function or a string, like `.Hotbar()`.
+*   `.run()`: Executes the queued operations. Returns a promise that resolves to `true` if all operations were successful, `false` otherwise.
 
-// "[ ...PrismarineItem, etc... ]" or "null" if one of the windows timed out
-console.log(clickedItems)
-```
-#### Chaining Queries
-- Using `bot.gui.advanceWindow`, it is possible to chain one large query from multiple complicated queries
-  
-  "Why would I want to do this?" You can modify Setters mid-query, allowing for more concise syntax
-```ts
-/*
-  Returns the current instance of 'Query' (Builder method)
-  Returns null if the window timed out
-*/
-await Query.advanceWindow(...matching)
-```
-- Intended use example:
-  1. Right clicking a `compass` in the hotbar, opening a GUI window
-  2. Left clicking `orange wool` with the display `Capture the Wool`, opening another GUI window
-  3. Left clicking `red wool` with the display `Red Team` (Joining the lobby)
-```js
-const clickedItems = await new bot.gui.Query()
-.mouseButton('right')
-.advanceWindow('compass')
-.then(Query => Query.matchBy('display')
-  .advanceWindow('Capture the Wool'))
-.then(Query => Query.clickItems('Red Team'))
+`comparator` is a function `(item, p_Item) => boolean` that determines if an item matches. `item` is your search criteria (usually a string), and `p_Item` is the item being checked.
 
-// "[ ...PrismarineItem, etc... ]" or "null" if one of the windows timed out
-console.log(clickedItems)
+### `Hotbar`
+
+*   `.Equip(item)`: Equips the specified item (by `displayName`) from the hotbar.
+*   `.Open(item, clickType = "right", timeout = 5000)`: Uses the specified item (by `displayName`) from the hotbar (or off-hand) to open a window (e.g., right-clicking a chest). `clickType` can be `"left"` or `"right"`. `timeout` is in milliseconds (how long to wait for the window to open; `-1` to disable).
+*   `.Move(item, targetSlot)`: Moves an item (by `displayName`) from the hotbar to the specified inventory slot.
+*   `.Drop(item, count = 64)`: Drops the specified item (by `displayName`) from the hotbar. `count` specifies the number of items to drop (up to 64).
+
+### `Window`
+
+*   `.Open(item, clickType = "left", timeout = 5000)`: Clicks the specified item (by `displayName`) within the window to open another window. `clickType` can be `"left"`, `"right"`, or `"shift"`. `timeout` is in milliseconds (how long to wait for the window to open; `-1` to disable).
+*   `.Click(item, clickType = "left", count = 1)`: Clicks the specified item (by `displayName`) within the window. `clickType` can be `"left"`, `"right"`, or `"shift"`. `count` is the number of times to click.
+*   `.Move(item, slot)`: Moves the specified item (by `displayName`) to the given slot within the window.
+*   `.Swap(item1, item2)`: Swaps the positions of two items (by `displayName`) within the window.
+*   `.Drop(item, count = 1)`: Drops the specified item from the window. `count` is the number of items to drop.
+
+Special: `.close()`: Closes the current window and returns to the parent `Query` object (Equivalent to `.end()`).
+
+### `Inventory`
+
+Same methods as `Window`, but operates on the player's inventory. Does *not* have a `.close()` method that closes the inventory (since you can't programmatically close the player's inventory).
+
+### `QuerySelector` (Base class; Common methods for Hotbar, Window, Inventory)
+
+*   `.Sleep(milliseconds)`: Adds a delay to the operation queue.
+*   `.end()`: Returns to the parent `Query` object.
+
+### Comparators
+
+Comparators determine if an item matches your criteria.
+
+This function takes two arguments:
+
+*   `item`: The item you're searching for (typically a string representing the `displayName`, but can also be a slot. Up to you).
+*   `p_Item`: An item in the inventory/window/hotbar (a mineflayer `Item` object).
+
+The comparator function should return `true` if the items match, and `false` otherwise.
+
+**Examples:**
+
+```javascript
+// Example 1: Using a string for displayName (most common use case):
+const comparator = (item, p_Item) => item === p_Item.displayName;
+
+// Example 2: Using a number for slot.
+const comparator = (item, p_Item) => item === p_Item.slot;
+
+// ...
+
+const query = new bot.gui.Query()
+  .Inventory(comparator)
+    .Open("Grass Block")
+    // ... or if you're using the 2nd example:
+    .Open(36) // first slot in hotbar (36 - 44)
+  .end();
 ```
