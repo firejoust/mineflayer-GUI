@@ -90,6 +90,7 @@ class Hotbar extends QuerySelector {
         }
       }
 
+      console.error(`Hotbar: Couldn't find a match for "${item}".`);
       return false;
     });
   }
@@ -108,7 +109,12 @@ class Hotbar extends QuerySelector {
           this.bot.deactivateItem();
 
           if (timeout > 0) {
-            await waitForEventWithTimeout(this.bot, "windowOpen", timeout);
+            try {
+              await waitForEventWithTimeout(this.bot, "windowOpen", timeout);
+            } catch (error) {
+              console.error(error);
+              return false;
+            }
           }
 
           return true;
@@ -137,16 +143,26 @@ class Hotbar extends QuerySelector {
           }
 
           if (timeout > 0) {
-            await waitForEventWithTimeout(this.bot, "windowOpen", timeout);
+            try {
+              await waitForEventWithTimeout(this.bot, "windowOpen", timeout);
+            } catch (error) {
+              console.error(error);
+              return false;
+            }
           }
 
           return true;
         }
       }
+
+      console.error(`Hotbar: Couldn't find a match for "${item}".`);
       return false;
     });
   }
 
+  // Temporary disabled; Hotbar should not use window operations (use Inventory instead)
+
+  /*
   Move(item, targetSlot) {
     return this._appendToQueue(async () => {
       // Find the item in hotbar slots (0-8)
@@ -203,6 +219,7 @@ class Hotbar extends QuerySelector {
       return false; // Destination slot occupied with different/full item
     });
   }
+  */
 
   Drop(item, count = 64) {
     return this._appendToQueue(async () => {
@@ -225,6 +242,8 @@ class Hotbar extends QuerySelector {
           return true;
         }
       }
+
+      console.error(`Hotbar: Couldn't find a match for "${item}".`);
       return false;
     });
   }
@@ -238,6 +257,7 @@ class Window extends QuerySelector {
   Open(item, clickType = "left", timeout = 5000) {
     return this._appendToQueue(async () => {
       if (this.window === null) {
+        console.error(`Window: There is no window open currently (bot.currentWindow is null).`);
         return false;
       }
 
@@ -263,6 +283,7 @@ class Window extends QuerySelector {
 
             return true;
           } catch (error) {
+            console.error(error);
             // If timeout occurred, item might not be openable
             return false;
           }
@@ -270,6 +291,7 @@ class Window extends QuerySelector {
       }
 
       // No item matches were found
+      console.error(`Window: Couldn't find a match for "${item}".`);
       return false;
     });
   }
@@ -277,6 +299,7 @@ class Window extends QuerySelector {
   Click(item, clickType = "left", count = 1) {
     return this._appendToQueue(async () => {
       if (this.window === null) {
+        console.error(`Window: There is no window open currently (bot.currentWindow is null).`);
         return false;
       }
 
@@ -316,6 +339,7 @@ class Window extends QuerySelector {
       }
 
       // No item matches were found
+      console.error(`Window: Couldn't find a match for "${item}".`);
       return false;
     });
   }
@@ -323,11 +347,13 @@ class Window extends QuerySelector {
   Move(item, slot) {
     return this._appendToQueue(async () => {
       if (this.window === null) {
+        console.error(`Window: There is no window open currently (bot.currentWindow is null).`);
         return false;
       }
 
       // Check if destination slot exists and is available
       if (slot < 0 || slot >= this.window.slots.length) {
+        console.error(`Window: slot ${slot} was not within valid bounds.`);
         return false;
       }
 
@@ -346,6 +372,7 @@ class Window extends QuerySelector {
       }
 
       if (sourceSlot === -1) {
+        console.error(`Window: Couldn't find a match for "${item}".`);
         return false; // Source item not found
       }
 
@@ -362,6 +389,7 @@ class Window extends QuerySelector {
   Swap(item1, item2) {
     return this._appendToQueue(async () => {
       if (this.window === null) {
+        console.error(`Window: There is no window open currently (bot.currentWindow is null).`);
         return false;
       }
 
@@ -382,6 +410,7 @@ class Window extends QuerySelector {
       }
 
       if (slot1 === -1 || slot2 === -1) {
+        console.error(`Window: one or more of "${item1}" and "${item2}" were not found.`);
         return false; // One or both items not found
       }
 
@@ -402,6 +431,7 @@ class Window extends QuerySelector {
   Drop(item, count = 1) {
     return this._appendToQueue(async () => {
       if (this.window === null) {
+        console.error(`Window: There is no window open currently (bot.currentWindow is null).`);
         return false;
       }
 
@@ -428,6 +458,7 @@ class Window extends QuerySelector {
       }
 
       // No item matches were found
+      console.error(`Window: Couldn't find a match for "${item}".`);
       return false;
     });
   }
